@@ -123,9 +123,16 @@
   .form-select:focus { border-color:var(--accent); }
   .place-inputs { display:grid; gap:8px; }
   .place-row { display:flex; align-items:center; gap:10px; }
-  .place-label { font-size:12px; width:60px; flex-shrink:0; }
+  .place-label { font-size:12px; width:80px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .place-select { flex:1; background:var(--card); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:8px 10px; font-size:13px; outline:none; font-family:inherit; cursor:pointer; }
   .place-select:focus { border-color:var(--accent); }
+  /* PLAYER PICKER CHIPS */
+  .player-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px; }
+  .player-chip { display:flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:13px; font-weight:500; transition:all .18s; user-select:none; }
+  .player-chip:hover { border-color:var(--accent); }
+  .player-chip.selected { background:rgba(108,99,255,.18); border-color:var(--accent); color:var(--text); }
+  .player-chip .chip-check { width:14px; height:14px; border-radius:50%; border:1.5px solid var(--muted); display:inline-flex; align-items:center; justify-content:center; font-size:9px; flex-shrink:0; transition:all .18s; }
+  .player-chip.selected .chip-check { background:var(--accent); border-color:var(--accent); color:#fff; }
 
   /* GAMES */
   .game-card { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
@@ -203,6 +210,40 @@
   .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
   .empty-state .big { font-size:40px; margin-bottom:10px; }
 
+  /* TOURNAMENT */
+  .bracket-section { margin-bottom:24px; }
+  .bracket-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; color:var(--accent); margin-bottom:12px; }
+  .rr-table { width:100%; border-collapse:collapse; }
+  .rr-table th { background:var(--card2); padding:8px 12px; text-align:left; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+  .rr-table td { padding:10px 12px; border-bottom:1px solid var(--border); font-size:13px; }
+  .rr-table tr:last-child td { border-bottom:none; }
+  .rr-table tr:hover td { background:var(--card2); }
+  .rr-matchup { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .rr-matchup.done { border-color:var(--green); opacity:.8; }
+  .rr-matchup.pending { border-color:var(--border); }
+  .rr-vs { font-weight:700; font-size:13px; flex:1; }
+  .rr-result { font-size:12px; color:var(--green); font-weight:600; }
+  .rr-pending-tag { font-size:11px; color:var(--muted); }
+  .finals-card { background:linear-gradient(135deg,rgba(255,215,0,.08),var(--card)); border:2px solid var(--gold); border-radius:14px; padding:20px; margin-bottom:12px; }
+  .finals-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:3px; color:var(--gold); margin-bottom:4px; }
+  .finals-sub { font-size:11px; color:var(--muted); margin-bottom:16px; }
+  .finals-teams { display:flex; align-items:center; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .finals-team { flex:1; min-width:100px; text-align:center; }
+  .finals-team-name { font-weight:700; font-size:15px; }
+  .finals-team-wins { font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:1; }
+  .finals-vs { font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--muted); }
+  .finals-game { background:var(--card2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+  .finals-game-num { font-size:11px; color:var(--muted); width:50px; flex-shrink:0; }
+  .finals-game-result { font-size:13px; font-weight:600; flex:1; }
+  .finals-game-btn { flex-shrink:0; }
+  .winner-banner { background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,215,0,.05)); border:2px solid var(--gold); border-radius:14px; padding:24px; text-align:center; margin-bottom:16px; }
+  .winner-banner-crown { font-size:48px; }
+  .winner-banner-name { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:3px; color:var(--gold); }
+  .winner-banner-sub { font-size:13px; color:var(--muted); margin-top:4px; }
+  .tourn-setup { background:var(--card2); border:1px dashed var(--accent); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .adv-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(255,215,0,.12); border:1px solid var(--gold); border-radius:20px; padding:2px 8px; font-size:10px; color:var(--gold); font-weight:700; }
+  .elim-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(255,101,132,.1); border:1px solid var(--accent2); border-radius:20px; padding:2px 8px; font-size:10px; color:var(--accent2); font-weight:700; }
+
   /* MATCH LIMIT */
   .limit-bar-wrap { background:var(--border); border-radius:4px; height:4px; margin-top:5px; width:100%; }
   .limit-bar-fill { height:100%; border-radius:4px; transition:width .4s; }
@@ -265,6 +306,7 @@
   <div class="tabs">
     <div class="tab active" onclick="showPage('standings')">🏆 Standings</div>
     <div class="tab" onclick="showPage('matches')">⚔️ Matches</div>
+    <div class="tab" onclick="showPage('tournament')">🏟️ Tournament</div>
     <div class="tab" onclick="showPage('games')">🎮 Games</div>
     <div class="tab" onclick="showPage('hof')">🎖️ Hall of Fame</div>
     <div class="tab" onclick="showPage('players')">👥 Players</div>
@@ -308,7 +350,7 @@
         <div class="form-row">
           <div>
             <span class="form-label">Game</span>
-            <select class="form-select" id="lm-game" onchange="updatePlaceSelects()">
+            <select class="form-select" id="lm-game">
               <option value="">— Select game —</option>
             </select>
           </div>
@@ -317,8 +359,12 @@
             <input type="date" id="lm-date" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;" />
           </div>
         </div>
-        <div style="margin-bottom:12px;">
-          <span class="form-label">Players &amp; Finishing Positions</span>
+        <div style="margin-bottom:14px;">
+          <span class="form-label">Who played?</span>
+          <div id="lm-player-chips" class="player-chips"></div>
+        </div>
+        <div id="lm-positions-section" style="display:none;margin-bottom:12px;">
+          <span class="form-label">Finishing Positions</span>
           <div id="lm-place-inputs" class="place-inputs"></div>
         </div>
         <div class="btn-row" style="margin-top:0;">
@@ -376,6 +422,12 @@
         <button class="btn btn-secondary btn-sm" onclick="toggleAddGameForm()">Cancel</button>
       </div>
     </div>
+  </div>
+
+  <!-- ══ TOURNAMENT ══ -->
+  <div id="page-tournament" class="page">
+    <div class="section-title">🏟️ Tournament</div>
+    <div id="tournament-content"></div>
   </div>
 
   <!-- ══ HALL OF FAME ══ -->
@@ -468,7 +520,8 @@ const EMOJI_LIST = ['🎮','🕹️','👾','🏈','⚽','🏀','🎯','🥊','�
 //  STATE
 // ════════════════════════════════
 let DB_URL = '';
-let state = { players:[], games:[], matches:[], activeSeason:null, hof:[], matchLimit:0 };
+let state = { players:[], games:[], matches:[], activeSeason:null, hof:[], matchLimit:0, tournaments:[] };
+let tournamentSelectedPlayers = new Set();
 let editingGameId = null;
 let emojiPickerFor = null;
 let addGameFormOpen = false;
@@ -476,6 +529,7 @@ let selEmoji = '🎮';
 let toastTimer = null;
 let pollInterval = null;
 let logFormOpen = false;
+let selectedPlayers = new Set(); // player IDs selected in the match log form
 
 // ════════════════════════════════
 //  FIREBASE REST API
@@ -591,13 +645,14 @@ async function initData() {
 
 async function fetchAll() {
   try {
-    const [players, games, matchesRaw, activeSeasonRaw, hofRaw, matchLimitRaw] = await Promise.all([
+    const [players, games, matchesRaw, activeSeasonRaw, hofRaw, matchLimitRaw, tournamentsRaw] = await Promise.all([
       dbGet('players'),
       dbGet('games'),
       dbGet('matches'),
       dbGet('activeSeason'),
       dbGet('hof'),
       dbGet('matchLimit'),
+      dbGet('tournaments'),
     ]);
     state.players = players ? Object.values(players) : [];
     state.games   = games   ? Object.values(games).sort((a,b)=>(a.order??99)-(b.order??99)) : [];
@@ -605,6 +660,7 @@ async function fetchAll() {
     state.activeSeason = activeSeasonRaw || null;
     state.hof = hofRaw ? Object.values(hofRaw).sort((a,b)=> (b.endDate||'').localeCompare(a.endDate||'')) : [];
     state.matchLimit = matchLimitRaw != null ? parseInt(matchLimitRaw) : 0;
+    state.tournaments = tournamentsRaw ? Object.values(tournamentsRaw) : [];
     render();
     flashSync();
   } catch(e) { console.warn('Fetch error', e); }
@@ -658,6 +714,13 @@ function getSeasonStandings() {
     seasonMatches.forEach(m => {
       const pos = m.results && m.results[p.id];
       if (!pos) return;
+      // Finals matches always count and are never subject to the match limit
+      if (m.isFinals) {
+        const mult = m.finalsMultiplier || 5;
+        pts += (BASE_POINTS[pos] || 1) * mult;
+        wins += pos === 1 ? 1 : 0;
+        return;
+      }
       if (matchCount < limit) {
         const game = state.games.find(g => g.id === m.gameId);
         const mult = game ? (game.multiplier || 1) : 1;
@@ -680,6 +743,7 @@ function render() {
   renderStandings();
   renderMatches();
   renderGames();
+  renderTournament();
   renderHof();
   renderPlayers();
   renderAdmin();
@@ -756,7 +820,8 @@ function renderMatches() {
   const dateEl = document.getElementById('lm-date');
   if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
 
-  // update place selects
+  // update chips and place selects
+  renderPlayerChips();
   updatePlaceSelects();
 
   // show/hide log form controls based on active season
@@ -788,6 +853,7 @@ function renderMatches() {
   if (state.matchLimit > 0) {
     const playerCounts = {};
     for (const m of seasonMatchesSorted) {
+      if (m.isFinals) continue; // finals are never over-limit
       let thisMatchOver = false;
       for (const pid of Object.keys(m.results||{})) {
         if ((playerCounts[pid]||0) >= state.matchLimit) { thisMatchOver = true; break; }
@@ -834,12 +900,46 @@ function renderMatches() {
   }).join('');
 }
 
+function renderPlayerChips() {
+  const container = document.getElementById('lm-player-chips');
+  if (!container) return;
+  container.innerHTML = state.players.map(p => {
+    const sel = selectedPlayers.has(p.id);
+    return `<div class="player-chip${sel?' selected':''}" onclick="togglePlayerChip('${p.id}')">
+      <span class="chip-check">${sel ? '✓' : ''}</span>
+      <span>${p.emoji} ${escHtml(p.name)}</span>
+    </div>`;
+  }).join('');
+}
+
+function togglePlayerChip(playerId) {
+  if (selectedPlayers.has(playerId)) {
+    selectedPlayers.delete(playerId);
+  } else {
+    selectedPlayers.add(playerId);
+  }
+  renderPlayerChips();
+  updatePlaceSelects();
+}
+
 function updatePlaceSelects() {
   const container = document.getElementById('lm-place-inputs');
-  if (!container) return;
-  const positions = ['', '1', '2', '3', '4', '5', '6'];
-  const labels = {'':'—','1':'🥇 1st','2':'🥈 2nd','3':'🥉 3rd','4':'4th','5':'5th','6':'6th'};
-  container.innerHTML = state.players.map(p =>
+  const section = document.getElementById('lm-positions-section');
+  if (!container || !section) return;
+
+  const activePlayers = state.players.filter(p => selectedPlayers.has(p.id));
+  if (activePlayers.length < 2) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+
+  const positions = ['', ...Array.from({length: activePlayers.length}, (_,i) => String(i+1))];
+  const medals = {1:'🥇',2:'🥈',3:'🥉'};
+  const labels = {'':'—'};
+  positions.slice(1).forEach(p => { labels[p] = (medals[parseInt(p)] || p+'th') + ' place'; });
+
+  container.innerHTML = activePlayers.map(p =>
     `<div class="place-row">
       <div class="place-label">${p.emoji} ${escHtml(p.name)}</div>
       <select class="place-select" id="lm-pos-${p.id}">
@@ -1040,6 +1140,12 @@ async function endSeason() {
 // ════════════════════════════════
 function toggleLogForm(open) {
   logFormOpen = open;
+  if (open) {
+    selectedPlayers = new Set();
+    document.getElementById('lm-positions-section').style.display = 'none';
+    renderPlayerChips();
+    updatePlaceSelects();
+  }
   document.getElementById('log-match-form').style.display = open ? 'block' : 'none';
   document.getElementById('log-match-btn').style.display = open ? 'none' : 'inline-flex';
 }
@@ -1050,13 +1156,15 @@ async function logMatch() {
   const date = document.getElementById('lm-date').value;
   if (!gameId) { showToast('Select a game!'); return; }
 
+  if (selectedPlayers.size < 2) { showToast('Select at least 2 players!'); return; }
+
   const results = {};
-  let hasResult = false;
-  state.players.forEach(p => {
-    const val = document.getElementById('lm-pos-'+p.id)?.value;
-    if (val) { results[p.id] = parseInt(val); hasResult = true; }
+  selectedPlayers.forEach(pid => {
+    const val = document.getElementById('lm-pos-'+pid)?.value;
+    if (val) results[pid] = parseInt(val);
   });
-  if (!hasResult) { showToast('Enter at least one result!'); return; }
+
+  if (Object.keys(results).length < 2) { showToast('Assign positions to the players!'); return; }
 
   // Check for duplicate positions
   const usedPos = Object.values(results);
@@ -1076,7 +1184,7 @@ async function logMatch() {
   await dbPush('matches', match);
   // Reset form
   document.getElementById('lm-game').value = '';
-  updatePlaceSelects();
+  selectedPlayers = new Set();
   toggleLogForm(false);
   await fetchAll();
   showToast('⚔️ Match logged!');
@@ -1178,13 +1286,396 @@ async function removePlayer(id) {
 }
 
 // ════════════════════════════════
+//  TOURNAMENT
+// ════════════════════════════════
+
+// Generate all round-robin matchup pairs for a list of player IDs
+function generateRoundRobin(playerIds) {
+  const matchups = [];
+  for (let i = 0; i < playerIds.length; i++) {
+    for (let j = i + 1; j < playerIds.length; j++) {
+      matchups.push({ p1: playerIds[i], p2: playerIds[j], winnerId: null });
+    }
+  }
+  return matchups;
+}
+
+// Get current season's active tournament (if any)
+function getActiveTournament() {
+  if (!state.activeSeason) return null;
+  return state.tournaments.find(t => t.seasonId === state.activeSeason.id && t.status !== 'complete') || null;
+}
+
+function renderTournament() {
+  const container = document.getElementById('tournament-content');
+  if (!container) return;
+
+  if (!state.activeSeason) {
+    container.innerHTML = '<div class="empty-state"><div class="big">🏟️</div>No active season.<br>Start a season in Admin first.</div>';
+    return;
+  }
+
+  const tourn = getActiveTournament();
+  const completedTourneys = state.tournaments.filter(t => t.seasonId === state.activeSeason.id && t.status === 'complete');
+
+  if (!tourn) {
+    // Show setup form + any completed tournaments
+    let html = `
+      <div class="tourn-setup">
+        <div class="card-title" style="margin-bottom:14px;">Create Tournament</div>
+        <div style="margin-bottom:12px;">
+          <span class="form-label">Game</span>
+          <select class="form-select" id="tourn-game" style="margin-bottom:0;">
+            <option value="">— Select game —</option>
+            ${state.games.map(g => `<option value="${g.id}">${g.emoji} ${escHtml(g.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="form-label">Select Players</span>
+          <div id="tourn-player-chips" class="player-chips">
+            ${state.players.map(p => `
+              <div class="player-chip" id="tc-${p.id}" onclick="toggleTournamentChip('${p.id}')">
+                <span class="chip-check"></span>
+                <span>${p.emoji} ${escHtml(p.name)}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+          Round-robin: every player plays every other player once. Top 2 by wins advance to a <strong style="color:var(--gold);">Best-of-3 Finals</strong> — games count as 5× season points.
+        </div>
+        <button class="btn btn-primary" onclick="createTournament()">🏟️ Create Tournament</button>
+      </div>`;
+
+    if (completedTourneys.length > 0) {
+      html += completedTourneys.map(t => renderCompletedTournament(t)).join('');
+    } else {
+      html += '<div class="empty-state" style="padding:20px 0;"><div class="big">🏆</div>No tournaments yet this season.</div>';
+    }
+    container.innerHTML = html;
+    // Re-apply chip selection state
+    tournamentSelectedPlayers.forEach(id => {
+      const chip = document.getElementById('tc-'+id);
+      if (chip) chip.classList.add('selected');
+    });
+    return;
+  }
+
+  // Render active tournament
+  container.innerHTML = renderActiveTournament(tourn);
+}
+
+function toggleTournamentChip(playerId) {
+  if (tournamentSelectedPlayers.has(playerId)) {
+    tournamentSelectedPlayers.delete(playerId);
+  } else {
+    tournamentSelectedPlayers.add(playerId);
+  }
+  const chip = document.getElementById('tc-'+playerId);
+  if (chip) {
+    chip.classList.toggle('selected', tournamentSelectedPlayers.has(playerId));
+    chip.querySelector('.chip-check').textContent = tournamentSelectedPlayers.has(playerId) ? '✓' : '';
+  }
+}
+
+async function createTournament() {
+  const gameId = document.getElementById('tourn-game').value;
+  if (!gameId) { showToast('Select a game!'); return; }
+  if (tournamentSelectedPlayers.size < 3) { showToast('Need at least 3 players!'); return; }
+
+  const game = state.games.find(g => g.id === gameId);
+  const playerIds = [...tournamentSelectedPlayers];
+  const matchups = generateRoundRobin(playerIds);
+
+  const tourn = {
+    id: 'tourn_' + Date.now(),
+    seasonId: state.activeSeason.id,
+    gameId,
+    gameName: game.name,
+    gameEmoji: game.emoji,
+    playerIds,
+    matchups,         // round-robin: [{ p1, p2, winnerId }]
+    phase: 'roundrobin', // 'roundrobin' | 'finals' | 'complete'
+    status: 'active',
+    finals: null,     // { p1, p2, games: [{ winnerId }], winner: null }
+    createdAt: Date.now(),
+  };
+
+  await dbSet(`tournaments/${tourn.id}`, tourn);
+  tournamentSelectedPlayers = new Set();
+  await fetchAll();
+  showToast(`🏟️ ${game.name} Tournament created!`);
+}
+
+function renderActiveTournament(tourn) {
+  const game = state.games.find(g => g.id === tourn.gameId);
+  const rrStandings = getTournamentStandings(tourn);
+
+  let html = `<div class="card" style="background:linear-gradient(135deg,#0d0d1a,var(--card));border-color:var(--accent);margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:28px;">${tourn.gameEmoji}</div>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;">${escHtml(tourn.gameName)} Tournament</div>
+        <div style="font-size:11px;color:var(--muted);">${tourn.playerIds.length} players · ${tourn.phase === 'roundrobin' ? 'Round Robin' : tourn.phase === 'finals' ? '🔥 Finals' : 'Complete'}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" style="margin-left:auto;" onclick="deleteTournament('${tourn.id}')">Delete</button>
+    </div>
+  </div>`;
+
+  // === ROUND ROBIN PHASE ===
+  html += `<div class="bracket-section">
+    <div class="bracket-title">Round Robin</div>`;
+
+  // Standings table
+  html += `<div class="card" style="margin-bottom:12px;">
+    <table class="rr-table">
+      <thead><tr><th>Player</th><th>W</th><th>L</th><th>Played</th></tr></thead>
+      <tbody>
+        ${rrStandings.map((s, i) => {
+          const adv = tourn.phase !== 'roundrobin' && i < 2;
+          const elim = tourn.phase !== 'roundrobin' && i >= 2;
+          const badge = adv ? '<span class="adv-badge">▲ ADV</span>' : elim ? '<span class="elim-badge">✕ OUT</span>' : '';
+          return `<tr><td>${s.emoji} <strong>${escHtml(s.name)}</strong> ${badge}</td>
+            <td style="color:var(--green);font-weight:700;">${s.wins}</td>
+            <td style="color:var(--accent2);">${s.losses}</td>
+            <td>${s.played}</td></tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+
+  // Matchups
+  tourn.matchups.forEach((mu, idx) => {
+    const p1 = state.players.find(p => p.id === mu.p1);
+    const p2 = state.players.find(p => p.id === mu.p2);
+    const winner = mu.winnerId ? state.players.find(p => p.id === mu.winnerId) : null;
+    const isDone = !!mu.winnerId;
+    const canEdit = tourn.phase === 'roundrobin';
+
+    html += `<div class="rr-matchup ${isDone?'done':'pending'}">
+      <div class="rr-vs">${p1?p1.emoji:''} ${escHtml(p1?.name||'?')} <span style="color:var(--muted);font-weight:400;">vs</span> ${p2?p2.emoji:''} ${escHtml(p2?.name||'?')}</div>
+      ${isDone
+        ? `<div class="rr-result">✓ ${escHtml(winner?.name||'?')} won</div>
+           ${canEdit ? `<button class="icon-btn" onclick="clearRRResult('${tourn.id}',${idx})" title="Clear">↺</button>` : ''}`
+        : canEdit
+          ? `<div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-sm btn-secondary" onclick="setRRWinner('${tourn.id}',${idx},'${mu.p1}')">${p1?p1.emoji:''} ${escHtml(p1?.name||'?')}</button>
+              <button class="btn btn-sm btn-secondary" onclick="setRRWinner('${tourn.id}',${idx},'${mu.p2}')">${p2?p2.emoji:''} ${escHtml(p2?.name||'?')}</button>
+            </div>`
+          : `<div class="rr-pending-tag">Pending</div>`
+      }
+    </div>`;
+  });
+
+  // Advance to finals button
+  const allRRDone = tourn.matchups.every(mu => mu.winnerId);
+  if (tourn.phase === 'roundrobin' && allRRDone) {
+    html += `<div class="btn-row">
+      <button class="btn btn-gold" onclick="advanceToFinals('${tourn.id}')">🔥 Advance to Finals →</button>
+    </div>`;
+  } else if (tourn.phase === 'roundrobin' && !allRRDone) {
+    const remaining = tourn.matchups.filter(mu => !mu.winnerId).length;
+    html += `<div style="font-size:12px;color:var(--muted);margin-top:8px;">${remaining} matchup${remaining!==1?'s':''} remaining before finals.</div>`;
+  }
+  html += `</div>`; // end bracket-section
+
+  // === FINALS PHASE ===
+  if (tourn.phase === 'finals' || tourn.phase === 'complete') {
+    const finals = tourn.finals;
+    const fp1 = state.players.find(p => p.id === finals.p1);
+    const fp2 = state.players.find(p => p.id === finals.p2);
+    const p1wins = (finals.games||[]).filter(g => g.winnerId === finals.p1).length;
+    const p2wins = (finals.games||[]).filter(g => g.winnerId === finals.p2).length;
+    const champion = tourn.phase === 'complete' ? state.players.find(p => p.id === finals.winner) : null;
+
+    if (champion) {
+      html += `<div class="winner-banner">
+        <div class="winner-banner-crown">👑</div>
+        <div class="winner-banner-name">${champion.emoji} ${escHtml(champion.name)}</div>
+        <div class="winner-banner-sub">${escHtml(tourn.gameName)} Tournament Champion</div>
+      </div>`;
+    }
+
+    html += `<div class="finals-card">
+      <div class="finals-title">🔥 Best-of-3 Finals</div>
+      <div class="finals-sub">${tourn.gameEmoji} ${escHtml(tourn.gameName)} · Games count as <span style="color:var(--gold);">5× season points</span></div>
+      <div class="finals-teams">
+        <div class="finals-team">
+          <div class="finals-team-name">${fp1?fp1.emoji:''} ${escHtml(fp1?.name||'?')}</div>
+          <div class="finals-team-wins" style="color:${p1wins>p2wins?'var(--gold)':'var(--text)'}">${p1wins}</div>
+        </div>
+        <div class="finals-vs">VS</div>
+        <div class="finals-team">
+          <div class="finals-team-name">${fp2?fp2.emoji:''} ${escHtml(fp2?.name||'?')}</div>
+          <div class="finals-team-wins" style="color:${p2wins>p1wins?'var(--gold)':'var(--text)'}">${p2wins}</div>
+        </div>
+      </div>`;
+
+    // Game-by-game
+    for (let gi = 0; gi < 3; gi++) {
+      const g = (finals.games||[])[gi];
+      const needed = Math.max(p1wins, p2wins) >= 2;
+      const isOver = tourn.phase === 'complete';
+      const gameWinner = g?.winnerId ? state.players.find(p => p.id === g.winnerId) : null;
+      const canPlay = tourn.phase === 'finals' && gi <= (finals.games||[]).length && !isOver;
+      const isElim = needed && gi >= Math.max(p1wins, p2wins) + (tourn.phase==='finals'?0:0) && !g?.winnerId;
+
+      html += `<div class="finals-game">
+        <div class="finals-game-num">Game ${gi+1}</div>
+        <div class="finals-game-result">
+          ${gameWinner
+            ? `<span style="color:var(--green);">✓ ${gameWinner.emoji} ${escHtml(gameWinner.name)} won</span>`
+            : isOver || (needed && gi >= 2)
+              ? `<span style="color:var(--muted);">—</span>`
+              : `<span style="color:var(--muted);">Pending</span>`}
+        </div>
+        <div class="finals-game-btn">
+          ${canPlay && !g?.winnerId && !(p1wins>=2||p2wins>=2) && gi === (finals.games||[]).length
+            ? `<button class="btn btn-sm btn-secondary" onclick="logFinalsGame('${tourn.id}','${finals.p1}')">
+                ${fp1?fp1.emoji:''} ${escHtml(fp1?.name||'?')}
+               </button>
+               <button class="btn btn-sm btn-secondary" style="margin-left:6px;" onclick="logFinalsGame('${tourn.id}','${finals.p2}')">
+                ${fp2?fp2.emoji:''} ${escHtml(fp2?.name||'?')}
+               </button>`
+            : ''}
+        </div>
+      </div>`;
+    }
+
+    html += `</div>`; // finals-card
+  }
+
+  return html;
+}
+
+function renderCompletedTournament(tourn) {
+  const finals = tourn.finals;
+  const champion = finals?.winner ? state.players.find(p => p.id === finals.winner) : null;
+  return `<div class="finals-card" style="opacity:.85;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="font-size:28px;">🏆</div>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;">${tourn.gameEmoji} ${escHtml(tourn.gameName)} Tournament</div>
+        <div style="font-weight:700;color:var(--gold);">${champion ? champion.emoji+' '+champion.name : '—'} <span style="color:var(--muted);font-weight:400;font-size:12px;">Champion</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function getTournamentStandings(tourn) {
+  return tourn.playerIds.map(pid => {
+    const p = state.players.find(pl => pl.id === pid) || { name: pid, emoji: '👤' };
+    let wins = 0, losses = 0;
+    (tourn.matchups||[]).forEach(mu => {
+      if (mu.winnerId) {
+        if (mu.p1 === pid || mu.p2 === pid) {
+          if (mu.winnerId === pid) wins++; else losses++;
+        }
+      }
+    });
+    return { ...p, wins, losses, played: wins + losses };
+  }).sort((a,b) => b.wins - a.wins || a.losses - b.losses);
+}
+
+async function setRRWinner(tournId, matchupIdx, winnerId) {
+  const tourn = state.tournaments.find(t => t.id === tournId);
+  if (!tourn) return;
+  const matchups = [...tourn.matchups];
+  matchups[matchupIdx] = { ...matchups[matchupIdx], winnerId };
+  await dbPatch(`tournaments/${tournId}`, { matchups });
+  await fetchAll();
+}
+
+async function clearRRResult(tournId, matchupIdx) {
+  const tourn = state.tournaments.find(t => t.id === tournId);
+  if (!tourn) return;
+  const matchups = [...tourn.matchups];
+  matchups[matchupIdx] = { ...matchups[matchupIdx], winnerId: null };
+  await dbPatch(`tournaments/${tournId}`, { matchups });
+  await fetchAll();
+}
+
+async function advanceToFinals(tournId) {
+  const tourn = state.tournaments.find(t => t.id === tournId);
+  if (!tourn) return;
+  const standings = getTournamentStandings(tourn);
+  const top2 = standings.slice(0, 2);
+  if (!confirm(`Advance ${top2[0].name} and ${top2[1].name} to the Finals?`)) return;
+
+  const finals = { p1: top2[0].id, p2: top2[1].id, games: [], winner: null };
+  await dbPatch(`tournaments/${tournId}`, { phase: 'finals', finals });
+  await fetchAll();
+  showToast(`🔥 Finals: ${top2[0].name} vs ${top2[1].name}!`);
+}
+
+async function logFinalsGame(tournId, winnerId) {
+  const tourn = state.tournaments.find(t => t.id === tournId);
+  if (!tourn || tourn.phase !== 'finals') return;
+
+  const finals = { ...tourn.finals };
+  const games = [...(finals.games || [])];
+  games.push({ winnerId });
+  finals.games = games;
+
+  const p1wins = games.filter(g => g.winnerId === finals.p1).length;
+  const p2wins = games.filter(g => g.winnerId === finals.p2).length;
+  const seriesWinner = p1wins >= 2 ? finals.p1 : p2wins >= 2 ? finals.p2 : null;
+
+  if (seriesWinner) {
+    finals.winner = seriesWinner;
+  }
+
+  const update = { finals };
+
+  // Log this finals game as a real season match with 5× multiplier
+  if (state.activeSeason) {
+    const game = state.games.find(g => g.id === tourn.gameId) || {};
+    const fp1 = state.players.find(p => p.id === finals.p1);
+    const fp2 = state.players.find(p => p.id === finals.p2);
+    const loser = winnerId === finals.p1 ? finals.p2 : finals.p1;
+    const matchEntry = {
+      seasonId: state.activeSeason.id,
+      gameId: tourn.gameId,
+      gameName: `${tourn.gameName} Finals G${games.length}`,
+      gameEmoji: tourn.gameEmoji,
+      date: new Date().toISOString().slice(0,10),
+      results: { [winnerId]: 1, [loser]: 2 },
+      finalsMultiplier: 5,
+      isFinals: true,
+      loggedAt: Date.now(),
+    };
+    await dbPush('matches', matchEntry);
+    // Also store the override multiplier on this specific match
+    // (We'll handle it in scoring by checking isFinals flag)
+  }
+
+  if (seriesWinner) {
+    update.phase = 'complete';
+    update.status = 'complete';
+    const winner = state.players.find(p => p.id === seriesWinner);
+    showToast(`👑 ${winner?.emoji} ${winner?.name} wins the tournament!`);
+  } else {
+    showToast(`Game logged! ${p1wins}-${p2wins} series.`);
+  }
+
+  await dbPatch(`tournaments/${tournId}`, update);
+  await fetchAll();
+}
+
+async function deleteTournament(tournId) {
+  if (!confirm('Delete this tournament? This cannot be undone.')) return;
+  await dbDelete(`tournaments/${tournId}`);
+  await fetchAll();
+  showToast('Tournament deleted.');
+}
+
+// ════════════════════════════════
 //  UI HELPERS
 // ════════════════════════════════
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  const order=['standings','matches','games','hof','players','admin'];
+  const order=['standings','matches','tournament','games','hof','players','admin'];
   document.querySelectorAll('.tab')[order.indexOf(name)]?.classList.add('active');
 }
 
