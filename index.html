@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏆 THE BORCHLYMPICS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32;
+    --bg: #0a0a0f; --card: #12121a; --card2: #1a1a26;
+    --accent: #6c63ff; --accent2: #ff6584; --green: #4caf50;
+    --text: #e8e8f0; --muted: #666680; --border: #2a2a3a;
+    --orange: #ff9800;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+  /* SETUP */
+  #setup-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:radial-gradient(ellipse at center,#1a0a2e 0%,var(--bg) 70%); }
+  .setup-box { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:40px 32px; max-width:480px; width:100%; text-align:center; }
+  .setup-logo { font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:4px; background:linear-gradient(135deg,var(--gold),#fff,var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
+  .setup-tagline { font-size:12px; letter-spacing:3px; color:var(--accent); text-transform:uppercase; margin:6px 0 24px; }
+  .setup-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; font-weight:600; text-align:left; display:block; }
+  .setup-input { width:100%; background:var(--card2); border:1px solid var(--border); color:var(--text); border-radius:10px; padding:12px 14px; font-size:14px; outline:none; font-family:inherit; margin-bottom:8px; }
+  .setup-input:focus { border-color:var(--accent); }
+  .setup-hint { font-size:11px; color:var(--muted); line-height:1.7; text-align:left; margin-bottom:4px; }
+  .setup-hint a { color:var(--accent); text-decoration:none; }
+  .setup-hint a:hover { text-decoration:underline; }
+  .setup-divider { border:none; border-top:1px solid var(--border); margin:24px 0; }
+  .setup-btn { width:100%; padding:14px; border-radius:10px; border:none; background:var(--accent); color:#fff; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; transition:all .2s; }
+  .setup-btn:hover { background:#7c74ff; transform:translateY(-1px); }
+  .setup-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+  .setup-error { color:var(--accent2); font-size:12px; margin-top:10px; min-height:18px; text-align:left; }
+  .guide-box { background:var(--card2); border-radius:10px; padding:16px; margin-top:12px; text-align:left; }
+
+  /* SYNC BAR */
+  #sync-bar { position:fixed; top:0; left:0; right:0; height:3px; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform .3s,opacity .5s; z-index:9999; }
+  #sync-bar.active { transform:scaleX(1); }
+  #sync-bar.fade { opacity:0; }
+
+  /* HEADER */
+  .header { background:linear-gradient(135deg,#0a0a0f 0%,#1a0a2e 50%,#0a0a0f 100%); border-bottom:2px solid var(--accent); padding:28px 24px 20px; text-align:center; position:relative; overflow:hidden; }
+  .header::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,rgba(108,99,255,.1) 0%,transparent 60%); pointer-events:none; }
+  .header h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(40px,9vw,84px); letter-spacing:6px; background:linear-gradient(135deg,var(--gold) 0%,#fff 50%,var(--gold) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
+  .header .sub { font-size:11px; letter-spacing:4px; color:var(--accent); text-transform:uppercase; margin-top:4px; font-weight:500; }
+  .season-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(108,99,255,.15); border:1px solid var(--accent); border-radius:20px; padding:4px 12px; font-size:11px; color:var(--accent); font-weight:600; margin-top:8px; }
+  .live-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(76,175,80,.15); border:1px solid var(--green); border-radius:20px; padding:3px 10px; font-size:11px; color:var(--green); font-weight:600; margin-top:6px; margin-left:6px; }
+  .live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 1.5s infinite; }
+  .no-season-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,101,132,.12); border:1px solid var(--accent2); border-radius:20px; padding:4px 12px; font-size:11px; color:var(--accent2); font-weight:600; margin-top:8px; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* TABS */
+  .tabs { display:flex; background:var(--card); border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab { padding:14px 14px; cursor:pointer; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .2s; }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* PAGES */
+  .page { display:none; padding:24px 20px; max-width:900px; margin:0 auto; }
+  .page.active { display:block; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:3px; color:var(--gold); margin-bottom:16px; }
+
+  /* CARD */
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .card-title { font-weight:700; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin-bottom:12px; }
+
+  /* STANDINGS PODIUM */
+  .standings-podium { display:flex; justify-content:center; align-items:flex-end; gap:12px; margin-bottom:28px; padding:16px 0; }
+  .podium-slot { text-align:center; flex:1; max-width:150px; }
+  .podium-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 6px; border:3px solid; }
+  .p1 .podium-avatar { border-color:var(--gold); background:rgba(255,215,0,.12); }
+  .p2 .podium-avatar { border-color:var(--silver); background:rgba(192,192,192,.08); }
+  .p3 .podium-avatar { border-color:var(--bronze); background:rgba(205,127,50,.08); }
+  .podium-block { border-radius:8px 8px 0 0; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--bg); }
+  .p1 .podium-block { height:76px; background:var(--gold); }
+  .p2 .podium-block { height:56px; background:var(--silver); }
+  .p3 .podium-block { height:40px; background:var(--bronze); }
+  .podium-name { font-weight:700; font-size:13px; margin-bottom:2px; }
+  .podium-pts { font-size:11px; color:var(--muted); }
+
+  .stn-table { width:100%; border-collapse:collapse; }
+  .stn-table th { text-align:left; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); padding:8px 12px; border-bottom:1px solid var(--border); }
+  .stn-table td { padding:11px 12px; border-bottom:1px solid var(--border); font-size:13px; }
+  .stn-table tr:last-child td { border-bottom:none; }
+  .stn-table tr:hover td { background:var(--card2); }
+  .rbadge { width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; }
+  .r1 { background:rgba(255,215,0,.15); color:var(--gold); border:1px solid var(--gold); }
+  .r2 { background:rgba(192,192,192,.1); color:var(--silver); border:1px solid var(--silver); }
+  .r3 { background:rgba(205,127,50,.1); color:var(--bronze); border:1px solid var(--bronze); }
+  .rX { background:var(--card2); color:var(--muted); border:1px solid var(--border); }
+
+  /* MULTIPLIER BADGE */
+  .mult-badge { display:inline-block; padding:2px 7px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:.5px; }
+  .mult-1 { background:rgba(102,102,128,.2); color:var(--muted); border:1px solid var(--border); }
+  .mult-2 { background:rgba(108,99,255,.15); color:var(--accent); border:1px solid var(--accent); }
+  .mult-3 { background:rgba(255,215,0,.12); color:var(--gold); border:1px solid var(--gold); }
+  .mult-5 { background:rgba(255,152,0,.15); color:var(--orange); border:1px solid var(--orange); }
+
+  /* PROGRESS */
+  .progress-wrap { background:var(--border); border-radius:4px; height:5px; margin-top:8px; }
+  .progress-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .5s; }
+
+  /* MATCH LOG */
+  .match-card { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px; }
+  .match-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .match-game { font-weight:700; font-size:14px; flex:1; }
+  .match-date { font-size:11px; color:var(--muted); }
+  .match-results { display:flex; gap:8px; flex-wrap:wrap; }
+  .match-result-chip { display:flex; align-items:center; gap:5px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:4px 10px; font-size:12px; }
+  .place-1 { border-color:var(--gold); }
+  .place-2 { border-color:var(--silver); }
+  .place-3 { border-color:var(--bronze); }
+
+  /* LOG MATCH FORM */
+  .log-form { background:var(--card2); border:1px dashed var(--accent); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .form-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .form-row > * { flex:1; min-width:140px; }
+  .form-label { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; font-weight:600; display:block; }
+  .form-select { width:100%; background:var(--card); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px 12px; font-size:13px; outline:none; font-family:inherit; cursor:pointer; }
+  .form-select:focus { border-color:var(--accent); }
+  .place-inputs { display:grid; gap:8px; }
+  .place-row { display:flex; align-items:center; gap:10px; }
+  .place-label { font-size:12px; width:60px; flex-shrink:0; }
+  .place-select { flex:1; background:var(--card); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:8px 10px; font-size:13px; outline:none; font-family:inherit; cursor:pointer; }
+  .place-select:focus { border-color:var(--accent); }
+
+  /* GAMES */
+  .game-card { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .game-card.editing { border-color:var(--accent); }
+  .game-top { display:flex; align-items:center; gap:12px; }
+  .game-emoji { font-size:26px; width:34px; text-align:center; flex-shrink:0; cursor:pointer; transition:transform .15s; }
+  .game-emoji:hover { transform:scale(1.2); }
+  .game-details { flex:1; min-width:0; }
+  .game-name { font-weight:600; font-size:14px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .game-format { font-size:11px; color:var(--muted); margin-top:2px; }
+  .game-actions { display:flex; gap:5px; flex-shrink:0; }
+  .icon-btn { background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted); padding:5px 8px; cursor:pointer; font-size:12px; transition:all .2s; font-family:inherit; line-height:1; }
+  .icon-btn:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+  .icon-btn.del:hover:not(:disabled) { border-color:var(--accent2); color:var(--accent2); }
+  .icon-btn:disabled { opacity:.3; cursor:not-allowed; }
+  .game-edit-area { margin-top:12px; }
+  .game-edit-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; align-items:flex-end; }
+  .game-edit-row input, .game-edit-row select { flex:1; min-width:110px; background:var(--card); border:1px solid var(--accent); color:var(--text); border-radius:7px; padding:8px 10px; font-size:13px; outline:none; font-family:inherit; }
+  .emoji-picker { display:flex; flex-wrap:wrap; gap:5px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px; margin-top:8px; max-height:120px; overflow-y:auto; }
+  .emoji-opt { font-size:19px; cursor:pointer; padding:3px 5px; border-radius:5px; transition:background .15s; }
+  .emoji-opt:hover { background:var(--card2); }
+  .add-game-box { background:var(--card2); border:1px dashed var(--accent); border-radius:10px; padding:16px; margin-top:10px; }
+  .add-game-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .add-game-row input, .add-game-row select { flex:1; min-width:120px; background:var(--card); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:9px 12px; font-size:13px; outline:none; font-family:inherit; }
+  .add-game-row input:focus, .add-game-row select:focus { border-color:var(--accent); }
+
+  /* HOF */
+  .hof-card { background:linear-gradient(135deg,rgba(255,215,0,.05),var(--card)); border:1px solid rgba(255,215,0,.2); border-radius:12px; padding:18px 20px; margin-bottom:12px; display:flex; align-items:center; gap:16px; }
+  .hof-trophy { font-size:36px; flex-shrink:0; }
+  .hof-season { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; color:var(--gold); }
+  .hof-winner { font-weight:700; font-size:15px; margin-top:2px; }
+  .hof-meta { font-size:11px; color:var(--muted); margin-top:3px; }
+  .hof-pts { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold); margin-left:auto; flex-shrink:0; }
+
+  /* SEASON ADMIN */
+  .season-info { background:linear-gradient(135deg,#1a0a2e,var(--card)); border:1px solid var(--accent); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .season-name-display { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:3px; color:var(--gold); }
+  .season-dates { font-size:12px; color:var(--muted); margin-top:4px; }
+
+  /* BUTTONS */
+  .btn { padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-size:13px; font-weight:600; letter-spacing:.5px; font-family:inherit; transition:all .2s; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:#7c74ff; transform:translateY(-1px); }
+  .btn-secondary { background:var(--card2); color:var(--text); border:1px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-danger { background:rgba(255,101,132,.12); color:var(--accent2); border:1px solid var(--accent2); }
+  .btn-danger:hover { background:rgba(255,101,132,.22); }
+  .btn-gold { background:rgba(255,215,0,.12); color:var(--gold); border:1px solid var(--gold); }
+  .btn-gold:hover { background:rgba(255,215,0,.22); }
+  .btn-sm { padding:6px 12px; font-size:12px; }
+  .btn-row { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+
+  /* PLAYERS */
+  .players-list { display:grid; gap:10px; margin-bottom:16px; }
+  .player-item { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:12px; }
+  .player-avatar { width:42px; height:42px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .player-name { font-weight:600; font-size:14px; }
+  .player-sub { font-size:11px; color:var(--muted); }
+  .ml-auto { margin-left:auto; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--card2); border:1px solid var(--border); color:var(--text); padding:11px 22px; border-radius:10px; font-weight:600; font-size:13px; transition:transform .3s; z-index:9998; pointer-events:none; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  input[type="text"], input[type="date"] { background:var(--card2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px 14px; font-size:13px; outline:none; font-family:inherit; width:100%; }
+  input[type="text"]:focus, input[type="date"]:focus { border-color:var(--accent); }
+  .input-row { display:flex; gap:10px; margin-bottom:14px; }
+  .input-row input { flex:1; }
+  .dot { width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:4px; vertical-align:middle; }
+  .dot-green { background:var(--green); }
+  .dot-gold { background:var(--gold); }
+  .dot-muted { background:var(--border); }
+  .games-grid { display:grid; gap:10px; }
+
+  .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
+  .empty-state .big { font-size:40px; margin-bottom:10px; }
+
+  /* MATCH LIMIT */
+  .limit-bar-wrap { background:var(--border); border-radius:4px; height:4px; margin-top:5px; width:100%; }
+  .limit-bar-fill { height:100%; border-radius:4px; transition:width .4s; }
+  .limit-ok   { background:var(--green); }
+  .limit-warn { background:var(--orange); }
+  .limit-over { background:var(--accent2); }
+  .over-limit-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(255,101,132,.12); border:1px solid var(--accent2); border-radius:20px; padding:2px 8px; font-size:10px; color:var(--accent2); font-weight:700; letter-spacing:.5px; }
+  .match-card.over-limit { border-color:var(--accent2); opacity:.75; }
+  .match-card.over-limit .match-game { color:var(--muted); }
+
+  @media(max-width:480px) { .page{padding:14px 10px;} .form-row>*{min-width:100%;} }
+</style>
+</head>
+<body>
+
+<div id="sync-bar"></div>
+
+<!-- ══════ SETUP SCREEN ══════ -->
+<div id="setup-screen">
+  <div class="setup-box">
+    <div style="font-size:36px;margin-bottom:4px;">👑</div>
+    <div class="setup-logo">Borchlympics</div>
+    <div class="setup-tagline">Season · Competitive · Free</div>
+
+    <label class="setup-label">Firebase Realtime Database URL</label>
+    <input class="setup-input" id="db-url" type="text" placeholder="https://your-project-default-rtdb.firebaseio.com" />
+    <div class="setup-hint">
+      No trailing slash needed. <a href="#" onclick="toggleGuide(event)">Setup guide ↓</a>
+    </div>
+    <div id="firebase-guide" style="display:none;" class="guide-box">
+      <div style="font-size:12px;color:var(--muted);line-height:2.1;">
+        <strong style="color:var(--text);">Free 2-min setup:</strong><br>
+        1. <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Add project<br>
+        2. Left sidebar → <strong style="color:var(--text);">Build → Realtime Database → Create Database</strong><br>
+        3. Choose location → <strong style="color:var(--text);">Start in test mode</strong><br>
+        4. Go to <strong style="color:var(--text);">Rules tab</strong> → set both to <strong style="color:var(--text);">true</strong> → Publish<br>
+        5. Copy the database URL and paste above
+      </div>
+    </div>
+
+    <hr class="setup-divider">
+    <button class="setup-btn" id="connect-btn" onclick="connectFirebase()">⚡ Connect &amp; Launch</button>
+    <div class="setup-error" id="setup-error"></div>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted);">URL saved locally — no need to re-enter next time.</div>
+  </div>
+</div>
+
+<!-- ══════ MAIN APP ══════ -->
+<div id="main-app" style="display:none;">
+  <div class="header">
+    <span style="font-size:32px;display:block;margin-bottom:2px;">👑</span>
+    <h1>Borchlympics</h1>
+    <p class="sub">Ultimate Video Game Championship</p>
+    <div style="margin-top:6px;">
+      <span id="header-season-badge"></span>
+      <span class="live-badge"><span class="live-dot"></span> Live &amp; Synced</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showPage('standings')">🏆 Standings</div>
+    <div class="tab" onclick="showPage('matches')">⚔️ Matches</div>
+    <div class="tab" onclick="showPage('games')">🎮 Games</div>
+    <div class="tab" onclick="showPage('hof')">🎖️ Hall of Fame</div>
+    <div class="tab" onclick="showPage('players')">👥 Players</div>
+    <div class="tab" onclick="showPage('admin')">⚙️ Admin</div>
+  </div>
+
+  <!-- ══ STANDINGS ══ -->
+  <div id="page-standings" class="page active">
+    <div class="section-title">🏆 Season Standings</div>
+    <div id="no-season-msg" style="display:none;">
+      <div class="card" style="border-color:var(--accent2);text-align:center;padding:30px;">
+        <div style="font-size:36px;margin-bottom:8px;">😴</div>
+        <div style="font-weight:700;margin-bottom:6px;">No Active Season</div>
+        <div style="font-size:12px;color:var(--muted);">Head to <strong style="color:var(--accent);">Admin</strong> to start a new season.</div>
+      </div>
+    </div>
+    <div id="standings-content">
+      <div id="podium-area"></div>
+      <div class="card">
+        <div class="card-title">Full Leaderboard</div>
+        <table class="stn-table">
+          <thead><tr><th>Rank</th><th>Player</th><th>Pts</th><th>Matches</th><th>Wins</th></tr></thead>
+          <tbody id="standings-body"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Season Progress</div>
+        <div id="season-match-count" style="font-size:12px;color:var(--muted);margin-bottom:6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MATCHES ══ -->
+  <div id="page-matches" class="page">
+    <div class="section-title">⚔️ Matches</div>
+
+    <!-- LOG MATCH FORM -->
+    <div id="log-match-section">
+      <div class="log-form" id="log-match-form" style="display:none;">
+        <div class="card-title" style="margin-bottom:14px;">Log a Match</div>
+        <div class="form-row">
+          <div>
+            <span class="form-label">Game</span>
+            <select class="form-select" id="lm-game" onchange="updatePlaceSelects()">
+              <option value="">— Select game —</option>
+            </select>
+          </div>
+          <div>
+            <span class="form-label">Date Played</span>
+            <input type="date" id="lm-date" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;" />
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="form-label">Players &amp; Finishing Positions</span>
+          <div id="lm-place-inputs" class="place-inputs"></div>
+        </div>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn btn-primary btn-sm" onclick="logMatch()">⚔️ Log Match</button>
+          <button class="btn btn-secondary btn-sm" onclick="toggleLogForm(false)">Cancel</button>
+        </div>
+      </div>
+      <div id="no-season-log" style="display:none;" class="card" style="border-color:var(--accent2);">
+        <div style="font-size:12px;color:var(--accent2);">⚠️ No active season — start one in Admin before logging matches.</div>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:16px;">
+      <button class="btn btn-primary" id="log-match-btn" onclick="toggleLogForm(true)">⚔️ Log a Match</button>
+    </div>
+
+    <div id="matches-list"></div>
+  </div>
+
+  <!-- ══ GAMES ══ -->
+  <div id="page-games" class="page">
+    <div class="section-title">🎮 Games</div>
+    <div class="card" style="background:linear-gradient(135deg,#1a0a2e,#12121a);border-color:var(--accent);margin-bottom:18px;">
+      <div style="font-size:12px;line-height:1.8;color:var(--muted);">
+        Set a <strong style="color:var(--text);">point multiplier</strong> per game — bigger/harder games are worth more.
+        <br><span class="mult-badge mult-1">1× Standard</span>
+        <span class="mult-badge mult-2" style="margin-left:4px;">2× Featured</span>
+        <span class="mult-badge mult-3" style="margin-left:4px;">3× Major</span>
+        <span class="mult-badge mult-5" style="margin-left:4px;">5× Grand Slam</span>
+      </div>
+    </div>
+    <div class="games-grid" id="games-list"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="toggleAddGameForm()">＋ Add Game</button>
+    </div>
+    <div id="add-game-box" class="add-game-box" style="display:none;">
+      <div class="card-title" style="margin-bottom:10px;">New Game</div>
+      <div style="margin-bottom:10px;">
+        <div class="setup-label">Choose Emoji</div>
+        <div id="add-emoji-picker" class="emoji-picker"></div>
+        <div style="font-size:11px;color:var(--accent);margin-top:6px;">Selected: <span id="sel-emoji">🎮</span></div>
+      </div>
+      <div class="add-game-row">
+        <input id="new-game-name" placeholder="Game name" />
+        <input id="new-game-fmt" placeholder="Format / rules" />
+        <select id="new-game-mult">
+          <option value="1">1× Standard</option>
+          <option value="2">2× Featured</option>
+          <option value="3">3× Major</option>
+          <option value="5">5× Grand Slam</option>
+        </select>
+      </div>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-primary btn-sm" onclick="addGame()">Add Game</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleAddGameForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HALL OF FAME ══ -->
+  <div id="page-hof" class="page">
+    <div class="section-title">🎖️ Hall of Fame</div>
+    <div class="card" style="background:linear-gradient(135deg,rgba(255,215,0,.06),var(--card));border-color:rgba(255,215,0,.3);margin-bottom:18px;">
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;">Every season champion immortalized. Win the season, win your place in history.</div>
+    </div>
+    <div id="hof-list"></div>
+  </div>
+
+  <!-- ══ PLAYERS ══ -->
+  <div id="page-players" class="page">
+    <div class="section-title">👥 Players</div>
+    <div class="input-row">
+      <input type="text" id="new-player-name" placeholder="Enter player name..." maxlength="20" onkeydown="if(event.key==='Enter')addPlayer()" />
+      <button class="btn btn-primary" onclick="addPlayer()">Add</button>
+    </div>
+    <div class="players-list" id="players-list"></div>
+    <div style="font-size:11px;color:var(--muted);">Supports up to 12 players. Removing a player deletes their match history.</div>
+  </div>
+
+  <!-- ══ ADMIN ══ -->
+  <div id="page-admin" class="page">
+    <div class="section-title">⚙️ Admin</div>
+
+    <!-- ACTIVE SEASON -->
+    <div id="active-season-panel"></div>
+
+    <!-- START SEASON FORM -->
+    <div id="start-season-panel" style="display:none;">
+      <div class="card" style="border-color:var(--accent);">
+        <div class="card-title">Start a New Season</div>
+        <div style="margin-bottom:10px;">
+          <span class="form-label">Season Name</span>
+          <input type="text" id="new-season-name" placeholder="e.g. May 2026 Season" maxlength="40" />
+        </div>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn btn-primary" onclick="startSeason()">🏁 Start Season</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCH LIMIT -->
+    <div class="card" style="margin-top:8px;">
+      <div class="card-title">Match Limit Per Player</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">
+        Set the max number of <strong style="color:var(--text);">counted matches</strong> per player per season.
+        Matches beyond the limit still log, but are flagged 🚩 and <strong style="color:var(--accent2);">those points don't count</strong> toward standings.
+        Set to 0 to disable the limit.
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <input type="number" id="match-limit-input" min="0" max="999" style="width:90px;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:14px;outline:none;font-family:inherit;" placeholder="0 = off" />
+        <button class="btn btn-primary btn-sm" onclick="saveMatchLimit()">Save Limit</button>
+        <span id="match-limit-display" style="font-size:12px;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <!-- FIREBASE CONNECTION -->
+    <div class="card" style="margin-top:8px;">
+      <div class="card-title">Firebase Connection</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Connected to:</div>
+      <div id="cur-db-url" style="font-size:12px;color:var(--accent);word-break:break-all;margin-bottom:14px;"></div>
+      <button class="btn btn-secondary btn-sm" onclick="disconnectFirebase()">🔌 Disconnect &amp; Reconfigure</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+//  CONFIG
+// ════════════════════════════════
+const DEFAULT_GAMES = [
+  { id:'fall_guys',    name:'Fall Guys',          emoji:'🪂', format:'1 Episode — First to win',        multiplier:1, order:0 },
+  { id:'golf_friends', name:'Golf With Friends',   emoji:'⛳', format:'Full course — Lowest score wins', multiplier:1, order:1 },
+  { id:'ufc',          name:'EA Sports UFC',        emoji:'🥊', format:'Round robin — 3-round fights',   multiplier:2, order:2 },
+  { id:'ncaa',         name:'NCAA Football 26',     emoji:'🏈', format:'1 game — 4 min quarters',        multiplier:3, order:3 },
+  { id:'fifa',         name:'EA Sports FC / FIFA',  emoji:'⚽', format:'1 game — 6 min halves',          multiplier:2, order:4 },
+  { id:'battlefield',  name:'Battlefield',          emoji:'💣', format:'Team Deathmatch — 10 min',       multiplier:1, order:5 },
+  { id:'nba2k',        name:'NBA 2K26',             emoji:'🏀', format:'1 game — 6 min quarters',        multiplier:2, order:6 },
+  { id:'madden',       name:'Madden NFL 26',        emoji:'🏟️', format:'1 game — 4 min quarters',        multiplier:3, order:7 },
+];
+const BASE_POINTS = { 1:10, 2:6, 3:3, 4:1 };
+const PEMOJIS = ['🎮','🕹️','👾','🎯','🔥','⚡','🌟','💫','🦁','🐺','🦊','🐉'];
+const EMOJI_LIST = ['🎮','🕹️','👾','🏈','⚽','🏀','🎯','🥊','🏒','🎳','🏎️','🎱','🤺','🏹','🪃','🛹','🎲','🃏','🎰','💣','🪂','⛳','🏋️','🚀','🐉','🔥','⚡','🌟','💫','🎪'];
+
+// ════════════════════════════════
+//  STATE
+// ════════════════════════════════
+let DB_URL = '';
+let state = { players:[], games:[], matches:[], activeSeason:null, hof:[], matchLimit:0 };
+let editingGameId = null;
+let emojiPickerFor = null;
+let addGameFormOpen = false;
+let selEmoji = '🎮';
+let toastTimer = null;
+let pollInterval = null;
+let logFormOpen = false;
+
+// ════════════════════════════════
+//  FIREBASE REST API
+// ════════════════════════════════
+function dbUrl(path) { return `${DB_URL.replace(/\/$/,'')}/${path}.json`; }
+
+async function dbGet(path) {
+  const r = await fetch(dbUrl(path));
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+async function dbSet(path, data) {
+  const r = await fetch(dbUrl(path), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+async function dbPatch(path, data) {
+  const r = await fetch(dbUrl(path), { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+async function dbDelete(path) { await fetch(dbUrl(path), { method:'DELETE' }); }
+async function dbPush(path, data) {
+  const r = await fetch(dbUrl(path), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+// ════════════════════════════════
+//  SETUP
+// ════════════════════════════════
+function toggleGuide(e) {
+  e.preventDefault();
+  const g = document.getElementById('firebase-guide');
+  g.style.display = g.style.display === 'none' ? 'block' : 'none';
+}
+
+async function connectFirebase() {
+  const raw = document.getElementById('db-url').value.trim().replace(/\/$/, '');
+  const errEl = document.getElementById('setup-error');
+  errEl.textContent = '';
+  if (!raw || !raw.startsWith('https://') || !raw.includes('firebaseio')) {
+    errEl.textContent = 'Please enter a valid Firebase Realtime Database URL.'; return;
+  }
+  const btn = document.getElementById('connect-btn');
+  btn.disabled = true; btn.textContent = 'Connecting...';
+  DB_URL = raw;
+  try {
+    const res = await fetch(`${raw}/.json`);
+    if (!res.ok) throw new Error(`Status ${res.status}`);
+    localStorage.setItem('borchlympics_db', raw);
+    launchApp(raw);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '⚡ Connect & Launch';
+    errEl.textContent = `Could not connect: ${e.message}. Make sure rules are set to true.`;
+  }
+}
+
+function launchApp(url) {
+  DB_URL = url.replace(/\/$/, '');
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('cur-db-url').textContent = url;
+  buildEmojiPicker();
+  initData().then(() => startPolling());
+}
+
+function disconnectFirebase() {
+  if (!confirm('Disconnect?')) return;
+  localStorage.removeItem('borchlympics_db');
+  clearInterval(pollInterval);
+  location.reload();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('borchlympics_db');
+  if (saved) { document.getElementById('db-url').value = saved; DB_URL = saved.replace(/\/$/, ''); launchApp(saved); }
+});
+
+function buildEmojiPicker() {
+  const picker = document.getElementById('add-emoji-picker');
+  picker.innerHTML = '';
+  EMOJI_LIST.forEach(em => {
+    const s = document.createElement('span');
+    s.className = 'emoji-opt'; s.textContent = em;
+    s.onclick = () => { selEmoji = em; document.getElementById('sel-emoji').textContent = em; };
+    picker.appendChild(s);
+  });
+}
+
+// ════════════════════════════════
+//  DATA INIT & POLLING
+// ════════════════════════════════
+async function initData() {
+  try {
+    const games = await dbGet('games');
+    if (!games) {
+      const gObj = {};
+      DEFAULT_GAMES.forEach(g => gObj[g.id] = g);
+      await dbSet('games', gObj);
+    }
+    const players = await dbGet('players');
+    if (!players) {
+      await dbSet('players', {
+        p1: { id:'p1', name:'Player 1', emoji:'🎮' },
+        p2: { id:'p2', name:'Player 2', emoji:'🕹️' },
+        p3: { id:'p3', name:'Player 3', emoji:'👾' },
+      });
+    }
+    await fetchAll();
+  } catch(e) { showToast('⚠️ Data load error: ' + e.message); }
+}
+
+async function fetchAll() {
+  try {
+    const [players, games, matchesRaw, activeSeasonRaw, hofRaw, matchLimitRaw] = await Promise.all([
+      dbGet('players'),
+      dbGet('games'),
+      dbGet('matches'),
+      dbGet('activeSeason'),
+      dbGet('hof'),
+      dbGet('matchLimit'),
+    ]);
+    state.players = players ? Object.values(players) : [];
+    state.games   = games   ? Object.values(games).sort((a,b)=>(a.order??99)-(b.order??99)) : [];
+    state.matches = matchesRaw ? Object.entries(matchesRaw).map(([k,v])=>({...v, _key:k})) : [];
+    state.activeSeason = activeSeasonRaw || null;
+    state.hof = hofRaw ? Object.values(hofRaw).sort((a,b)=> (b.endDate||'').localeCompare(a.endDate||'')) : [];
+    state.matchLimit = matchLimitRaw != null ? parseInt(matchLimitRaw) : 0;
+    render();
+    flashSync();
+  } catch(e) { console.warn('Fetch error', e); }
+}
+
+function startPolling() { pollInterval = setInterval(fetchAll, 4000); }
+
+function flashSync() {
+  const bar = document.getElementById('sync-bar');
+  bar.classList.remove('fade'); bar.classList.add('active');
+  setTimeout(() => { bar.classList.add('fade'); setTimeout(()=>bar.classList.remove('active','fade'),500); }, 700);
+}
+
+// ════════════════════════════════
+//  COMPUTED
+// ════════════════════════════════
+function getSeasonMatches() {
+  if (!state.activeSeason) return [];
+  return state.matches.filter(m => m.seasonId === state.activeSeason.id);
+}
+
+function getPlayerMatchCount(playerId) {
+  // Total matches in active season where this player participated
+  return getSeasonMatches().filter(m => m.results && m.results[playerId]).length;
+}
+
+function isMatchOverLimit(match) {
+  // A match is over-limit if ANY player in it has already hit the cap
+  // before this match was counted (by chronological order)
+  if (!state.matchLimit || state.matchLimit <= 0) return false;
+  const seasonMatches = getSeasonMatches().sort((a,b) => (a.loggedAt||0) - (b.loggedAt||0));
+  const matchResults = match.results || {};
+  for (const playerId of Object.keys(matchResults)) {
+    // count how many counted matches this player has BEFORE this one
+    let countBefore = 0;
+    for (const m of seasonMatches) {
+      if (m._key === match._key) break;
+      if (m.results && m.results[playerId]) countBefore++;
+    }
+    if (countBefore >= state.matchLimit) return true;
+  }
+  return false;
+}
+
+function getSeasonStandings() {
+  const seasonMatches = getSeasonMatches().sort((a,b) => (a.loggedAt||0) - (b.loggedAt||0));
+  const limit = state.matchLimit > 0 ? state.matchLimit : Infinity;
+
+  return state.players.map(p => {
+    let pts = 0, wins = 0, matchCount = 0, overCount = 0;
+    seasonMatches.forEach(m => {
+      const pos = m.results && m.results[p.id];
+      if (!pos) return;
+      if (matchCount < limit) {
+        const game = state.games.find(g => g.id === m.gameId);
+        const mult = game ? (game.multiplier || 1) : 1;
+        pts += (BASE_POINTS[pos] || 1) * mult;
+        matchCount++;
+        if (pos === 1) wins++;
+      } else {
+        overCount++;
+      }
+    });
+    return { ...p, pts, wins, matchCount, overCount, totalPlayed: matchCount + overCount };
+  }).sort((a,b) => b.pts - a.pts || b.wins - a.wins);
+}
+
+// ════════════════════════════════
+//  RENDER
+// ════════════════════════════════
+function render() {
+  renderHeader();
+  renderStandings();
+  renderMatches();
+  renderGames();
+  renderHof();
+  renderPlayers();
+  renderAdmin();
+}
+
+function renderHeader() {
+  const badge = document.getElementById('header-season-badge');
+  if (state.activeSeason) {
+    badge.className = 'season-badge';
+    badge.textContent = '🏁 ' + state.activeSeason.name;
+  } else {
+    badge.className = 'no-season-badge';
+    badge.textContent = '⏸ Off-Season';
+  }
+}
+
+function renderStandings() {
+  const noMsg = document.getElementById('no-season-msg');
+  const content = document.getElementById('standings-content');
+  if (!state.activeSeason) {
+    noMsg.style.display = 'block'; content.style.display = 'none'; return;
+  }
+  noMsg.style.display = 'none'; content.style.display = 'block';
+
+  const ranked = getSeasonStandings();
+  const seasonMatches = getSeasonMatches();
+
+  // Podium
+  const order = [ranked[1], ranked[0], ranked[2]].filter(Boolean);
+  const cls = ['p2','p1','p3'], medals = ['🥈','🥇','🥉'];
+  document.getElementById('podium-area').innerHTML = '<div class="standings-podium">' +
+    order.map((p,i) => `<div class="podium-slot ${cls[i]}">
+      <div class="podium-avatar">${p.emoji}</div>
+      <div class="podium-name">${escHtml(p.name)}</div>
+      <div class="podium-pts">${p.pts} pts</div>
+      <div class="podium-block">${medals[i]}</div></div>`).join('') + '</div>';
+
+  // Table
+  const rC = ['r1','r2','r3'];
+  const limit = state.matchLimit > 0 ? state.matchLimit : null;
+  document.getElementById('standings-body').innerHTML = ranked.map((p,i) => {
+    const played = p.totalPlayed || p.matchCount;
+    const counted = p.matchCount;
+    const over = p.overCount || 0;
+    let limitCell = `${played}`;
+    if (limit) {
+      const pct = Math.min(100, (counted / limit) * 100);
+      const barClass = counted >= limit ? 'limit-over' : counted >= limit * 0.8 ? 'limit-warn' : 'limit-ok';
+      const overTag = over > 0 ? ` <span class="over-limit-badge">+${over} 🚩</span>` : '';
+      limitCell = `${counted}/${limit}${overTag}
+        <div class="limit-bar-wrap"><div class="limit-bar-fill ${barClass}" style="width:${pct}%"></div></div>`;
+    }
+    return `<tr><td><span class="rbadge ${rC[i]||'rX'}">${i+1}</span></td>
+    <td><strong>${escHtml(p.name)}</strong> ${p.emoji}</td>
+    <td><strong>${p.pts}</strong></td><td style="min-width:100px;">${limitCell}</td><td>${p.wins}</td></tr>`;
+  }).join('');
+
+  document.getElementById('season-match-count').textContent =
+    `${seasonMatches.length} match${seasonMatches.length!==1?'es':''} logged this season · ${state.activeSeason.name}`;
+}
+
+function renderMatches() {
+  // update game dropdown
+  const sel = document.getElementById('lm-game');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— Select game —</option>' +
+    state.games.map(g => {
+      const mult = g.multiplier || 1;
+      const tag = mult > 1 ? ` (${mult}×)` : '';
+      return `<option value="${g.id}" ${g.id===prev?'selected':''}>${g.emoji} ${escHtml(g.name)}${tag}</option>`;
+    }).join('');
+
+  // set today's date if empty
+  const dateEl = document.getElementById('lm-date');
+  if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+
+  // update place selects
+  updatePlaceSelects();
+
+  // show/hide log form controls based on active season
+  const noSeasonLog = document.getElementById('no-season-log');
+  const logMatchBtn = document.getElementById('log-match-btn');
+  if (!state.activeSeason) {
+    noSeasonLog.style.display = 'block';
+    logMatchBtn.style.display = 'none';
+    document.getElementById('log-match-form').style.display = 'none';
+  } else {
+    noSeasonLog.style.display = 'none';
+    logMatchBtn.style.display = 'inline-flex';
+  }
+
+  // matches list — show current season first, then all
+  const seasonMatches = getSeasonMatches();
+  const allOther = state.matches.filter(m => !state.activeSeason || m.seasonId !== state.activeSeason.id);
+  const allSorted = [...seasonMatches, ...allOther].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  const list = document.getElementById('matches-list');
+  if (allSorted.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="big">⚔️</div>No matches logged yet.<br>Be the first to play!</div>';
+    return;
+  }
+
+  // pre-compute which season matches are over limit
+  const seasonMatchesSorted = getSeasonMatches().sort((a,b)=>(a.loggedAt||0)-(b.loggedAt||0));
+  const overLimitKeys = new Set();
+  if (state.matchLimit > 0) {
+    const playerCounts = {};
+    for (const m of seasonMatchesSorted) {
+      let thisMatchOver = false;
+      for (const pid of Object.keys(m.results||{})) {
+        if ((playerCounts[pid]||0) >= state.matchLimit) { thisMatchOver = true; break; }
+      }
+      if (thisMatchOver) {
+        overLimitKeys.add(m._key);
+      } else {
+        for (const pid of Object.keys(m.results||{})) {
+          playerCounts[pid] = (playerCounts[pid]||0) + 1;
+        }
+      }
+    }
+  }
+
+  list.innerHTML = allSorted.map(m => {
+    const game = state.games.find(g => g.id === m.gameId);
+    const mult = game ? (game.multiplier||1) : 1;
+    const multTag = mult > 1 ? `<span class="mult-badge mult-${mult}">${mult}×</span>` : '';
+    const isCurrent = state.activeSeason && m.seasonId === state.activeSeason.id;
+    const isOver = overLimitKeys.has(m._key);
+    const results = m.results ? Object.entries(m.results)
+      .sort(([,a],[,b]) => a-b)
+      .map(([pid, pos]) => {
+        const player = state.players.find(p => p.id === pid);
+        const name = player ? player.name : 'Unknown';
+        const emoji = player ? player.emoji : '👤';
+        const medals = {1:'🥇',2:'🥈',3:'🥉',4:'4th'};
+        return `<div class="match-result-chip place-${pos}">${medals[pos]||pos+'th'} ${emoji} ${escHtml(name)}</div>`;
+      }).join('') : '';
+    const overTag = isOver ? '<span class="over-limit-badge">🚩 OVER LIMIT — no pts</span>' : '';
+    const borderStyle = isOver ? 'border-color:var(--accent2)' : isCurrent ? 'border-color:rgba(108,99,255,.4)' : '';
+    return `<div class="match-card${isOver?' over-limit':''}" style="${borderStyle}">
+      <div class="match-header">
+        <div class="match-game">${m.gameEmoji||'🎮'} ${escHtml(m.gameName||'Unknown Game')} ${multTag} ${overTag}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${isCurrent && !isOver ? '<span style="font-size:10px;color:var(--accent);font-weight:700;letter-spacing:1px;">ACTIVE SEASON</span>' : ''}
+          ${!isCurrent ? '<span style="font-size:10px;color:var(--muted);">Past</span>' : ''}
+          <span class="match-date">${formatDate(m.date)}</span>
+          <button class="icon-btn del" onclick="removeMatch('${m._key}')" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="match-results">${results}</div>
+    </div>`;
+  }).join('');
+}
+
+function updatePlaceSelects() {
+  const container = document.getElementById('lm-place-inputs');
+  if (!container) return;
+  const positions = ['', '1', '2', '3', '4', '5', '6'];
+  const labels = {'':'—','1':'🥇 1st','2':'🥈 2nd','3':'🥉 3rd','4':'4th','5':'5th','6':'6th'};
+  container.innerHTML = state.players.map(p =>
+    `<div class="place-row">
+      <div class="place-label">${p.emoji} ${escHtml(p.name)}</div>
+      <select class="place-select" id="lm-pos-${p.id}">
+        ${positions.map(pos => `<option value="${pos}">${labels[pos]||pos}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+
+function renderGames() {
+  const list = document.getElementById('games-list');
+  list.innerHTML = '';
+  state.games.forEach((g, i) => {
+    const isEditing = editingGameId === g.id;
+    const isPickingEmoji = emojiPickerFor === g.id;
+    const mult = g.multiplier || 1;
+    const div = document.createElement('div');
+    div.className = 'game-card' + (isEditing ? ' editing' : '');
+    div.style.marginBottom = '10px';
+
+    let inner = `<div class="game-top">
+      <div class="game-emoji" onclick="toggleGameEmojiPicker('${g.id}')" title="Change emoji">${g.emoji}</div>
+      <div class="game-details">`;
+
+    if (isEditing) {
+      inner += `<div class="game-edit-area">
+        <div class="game-edit-row">
+          <input id="gn-${g.id}" value="${escHtml(g.name)}" placeholder="Game name" />
+          <input id="gf-${g.id}" value="${escHtml(g.format||'')}" placeholder="Format" />
+          <select id="gm-${g.id}">
+            <option value="1" ${mult===1?'selected':''}>1× Standard</option>
+            <option value="2" ${mult===2?'selected':''}>2× Featured</option>
+            <option value="3" ${mult===3?'selected':''}>3× Major</option>
+            <option value="5" ${mult===5?'selected':''}>5× Grand Slam</option>
+          </select>
+        </div>
+        <div class="btn-row" style="margin-top:6px;margin-bottom:0;">
+          <button class="btn btn-primary btn-sm" onclick="saveGameEdit('${g.id}')">Save</button>
+          <button class="btn btn-secondary btn-sm" onclick="cancelGameEdit()">Cancel</button>
+        </div></div>`;
+    } else {
+      inner += `<div class="game-name">
+          <span class="mult-badge mult-${mult}">${mult}×</span>
+          ${escHtml(g.name)}
+        </div>
+        <div class="game-format">${escHtml(g.format||'')}</div>`;
+    }
+
+    inner += `</div>`;
+    if (!isEditing) {
+      inner += `<div class="game-actions">
+        <button class="icon-btn" onclick="startGameEdit('${g.id}')" title="Edit">✏️</button>
+        <button class="icon-btn" onclick="moveGame('${g.id}',-1)" ${i===0?'disabled':''} title="Move up">▲</button>
+        <button class="icon-btn" onclick="moveGame('${g.id}',1)" ${i===state.games.length-1?'disabled':''} title="Move down">▼</button>
+        <button class="icon-btn del" onclick="removeGame('${g.id}')" title="Remove">✕</button>
+      </div>`;
+    }
+    inner += `</div>`;
+
+    if (isPickingEmoji) {
+      inner += `<div class="emoji-picker" style="margin-top:10px;">` +
+        EMOJI_LIST.map(em => `<span class="emoji-opt" onclick="setGameEmoji('${g.id}','${em}')">${em}</span>`).join('') +
+        `</div>`;
+    }
+    div.innerHTML = inner;
+    list.appendChild(div);
+  });
+}
+
+function renderHof() {
+  const list = document.getElementById('hof-list');
+  if (state.hof.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="big">🏆</div>No champions yet.<br>Complete a season to crown the first winner!</div>';
+    return;
+  }
+  list.innerHTML = state.hof.map((entry, i) => `
+    <div class="hof-card">
+      <div class="hof-trophy">${i===0?'🏆':'🎖️'}</div>
+      <div style="flex:1;">
+        <div class="hof-season">${escHtml(entry.name||'Season')}</div>
+        <div class="hof-winner">${entry.winnerEmoji||'👑'} ${escHtml(entry.winnerName||'Unknown')}</div>
+        <div class="hof-meta">${formatDate(entry.startDate)} → ${formatDate(entry.endDate)} · ${entry.matchCount||0} matches</div>
+      </div>
+      <div class="hof-pts">${entry.winnerPts}<br><span style="font-size:11px;font-family:'Inter',sans-serif;color:var(--muted);">pts</span></div>
+    </div>`).join('');
+}
+
+function renderPlayers() {
+  const standings = getSeasonStandings();
+  document.getElementById('players-list').innerHTML = standings.map(p =>
+    `<div class="player-item">
+      <div class="player-avatar">${p.emoji}</div>
+      <div><div class="player-name">${escHtml(p.name)}</div>
+      <div class="player-sub">${p.pts} pts this season · ${p.wins} wins</div></div>
+      <div class="ml-auto"><button class="btn btn-danger btn-sm" onclick="removePlayer('${p.id}')">Remove</button></div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:13px;">No players yet.</div>';
+}
+
+function renderAdmin() {
+  // Sync limit input
+  const limitInput = document.getElementById('match-limit-input');
+  const limitDisplay = document.getElementById('match-limit-display');
+  if (limitInput && document.activeElement !== limitInput) {
+    limitInput.value = state.matchLimit || '';
+  }
+  if (limitDisplay) {
+    limitDisplay.textContent = state.matchLimit > 0
+      ? `Currently: ${state.matchLimit} matches max per player`
+      : 'Currently: no limit';
+  }
+
+  const activePanel = document.getElementById('active-season-panel');
+  const startPanel = document.getElementById('start-season-panel');
+
+  if (state.activeSeason) {
+    startPanel.style.display = 'none';
+    const seasonMatches = getSeasonMatches();
+    const ranked = getSeasonStandings();
+    const leader = ranked[0];
+    activePanel.innerHTML = `
+      <div class="season-info">
+        <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;"><span class="dot dot-green"></span>Active Season</div>
+        <div class="season-name-display">${escHtml(state.activeSeason.name)}</div>
+        <div class="season-dates">Started ${formatDate(state.activeSeason.startDate)} · ${seasonMatches.length} match${seasonMatches.length!==1?'es':''} played</div>
+        ${leader ? `<div style="margin-top:10px;font-size:12px;color:var(--muted);">Current leader: <strong style="color:var(--gold);">${leader.emoji} ${escHtml(leader.name)}</strong> — ${leader.pts} pts</div>` : ''}
+      </div>
+      <div class="card" style="border-color:var(--accent2);">
+        <div class="card-title" style="color:var(--accent2);">End Season</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          This will crown the current leader as champion, add them to the Hall of Fame, and archive all match data. A new season can then be started.
+        </div>
+        <button class="btn btn-gold" onclick="endSeason()">🏆 End Season &amp; Crown Champion</button>
+      </div>`;
+  } else {
+    activePanel.innerHTML = `
+      <div class="card" style="border-color:var(--accent2);margin-bottom:16px;text-align:center;padding:20px;">
+        <div style="font-size:32px;margin-bottom:8px;">⏸</div>
+        <div style="font-weight:700;margin-bottom:4px;">No Active Season</div>
+        <div style="font-size:12px;color:var(--muted);">Start a new season below to begin tracking.</div>
+      </div>`;
+    startPanel.style.display = 'block';
+  }
+}
+
+// ════════════════════════════════
+//  MATCH LIMIT
+// ════════════════════════════════
+async function saveMatchLimit() {
+  const val = parseInt(document.getElementById('match-limit-input').value) || 0;
+  await dbSet('matchLimit', val);
+  await fetchAll();
+  showToast(val > 0 ? `✅ Limit set: ${val} matches per player` : '✅ Match limit disabled');
+}
+
+// ════════════════════════════════
+//  SEASON ACTIONS
+// ════════════════════════════════
+async function startSeason() {
+  const name = document.getElementById('new-season-name').value.trim();
+  if (!name) { showToast('Enter a season name!'); return; }
+  const id = 'season_' + Date.now();
+  const season = { id, name, startDate: new Date().toISOString().slice(0,10), active: true };
+  await dbSet('activeSeason', season);
+  document.getElementById('new-season-name').value = '';
+  await fetchAll();
+  showToast('🏁 ' + name + ' has begun!');
+}
+
+async function endSeason() {
+  if (!state.activeSeason) return;
+  const ranked = getSeasonStandings();
+  if (ranked.length === 0) { showToast('No players to crown!'); return; }
+  const winner = ranked[0];
+  const seasonMatches = getSeasonMatches();
+
+  if (!confirm(`End "${state.activeSeason.name}" and crown ${winner.name} as champion?`)) return;
+
+  // Save to Hall of Fame
+  const hofEntry = {
+    ...state.activeSeason,
+    endDate: new Date().toISOString().slice(0,10),
+    winnerId: winner.id,
+    winnerName: winner.name,
+    winnerEmoji: winner.emoji,
+    winnerPts: winner.pts,
+    matchCount: seasonMatches.length,
+  };
+  await dbSet(`hof/${state.activeSeason.id}`, hofEntry);
+
+  // Clear active season
+  await dbDelete('activeSeason');
+
+  await fetchAll();
+  showToast(`👑 ${winner.name} wins ${state.hof[0]?.name || 'the season'}!`);
+}
+
+// ════════════════════════════════
+//  MATCH ACTIONS
+// ════════════════════════════════
+function toggleLogForm(open) {
+  logFormOpen = open;
+  document.getElementById('log-match-form').style.display = open ? 'block' : 'none';
+  document.getElementById('log-match-btn').style.display = open ? 'none' : 'inline-flex';
+}
+
+async function logMatch() {
+  if (!state.activeSeason) { showToast('No active season!'); return; }
+  const gameId = document.getElementById('lm-game').value;
+  const date = document.getElementById('lm-date').value;
+  if (!gameId) { showToast('Select a game!'); return; }
+
+  const results = {};
+  let hasResult = false;
+  state.players.forEach(p => {
+    const val = document.getElementById('lm-pos-'+p.id)?.value;
+    if (val) { results[p.id] = parseInt(val); hasResult = true; }
+  });
+  if (!hasResult) { showToast('Enter at least one result!'); return; }
+
+  // Check for duplicate positions
+  const usedPos = Object.values(results);
+  if (new Set(usedPos).size !== usedPos.length) { showToast('Each position can only be used once!'); return; }
+
+  const game = state.games.find(g => g.id === gameId);
+  const match = {
+    seasonId: state.activeSeason.id,
+    gameId,
+    gameName: game ? game.name : gameId,
+    gameEmoji: game ? game.emoji : '🎮',
+    date: date || new Date().toISOString().slice(0,10),
+    results,
+    loggedAt: Date.now(),
+  };
+
+  await dbPush('matches', match);
+  // Reset form
+  document.getElementById('lm-game').value = '';
+  updatePlaceSelects();
+  toggleLogForm(false);
+  await fetchAll();
+  showToast('⚔️ Match logged!');
+}
+
+async function removeMatch(key) {
+  if (!confirm('Delete this match? Points will be recalculated.')) return;
+  await dbDelete(`matches/${key}`);
+  await fetchAll();
+  showToast('Match deleted.');
+}
+
+// ════════════════════════════════
+//  GAME ACTIONS
+// ════════════════════════════════
+function toggleAddGameForm() {
+  addGameFormOpen = !addGameFormOpen;
+  document.getElementById('add-game-box').style.display = addGameFormOpen ? 'block' : 'none';
+}
+
+async function addGame() {
+  const name = document.getElementById('new-game-name').value.trim();
+  const fmt  = document.getElementById('new-game-fmt').value.trim();
+  const mult = parseInt(document.getElementById('new-game-mult').value) || 1;
+  if (!name) { showToast('Enter a game name!'); return; }
+  const id = 'game_'+Date.now();
+  await dbSet(`games/${id}`, { id, name, format:fmt, emoji:selEmoji, multiplier:mult, order:state.games.length });
+  document.getElementById('new-game-name').value='';
+  document.getElementById('new-game-fmt').value='';
+  toggleAddGameForm();
+  await fetchAll();
+  showToast(selEmoji+' '+name+' added!');
+}
+
+function startGameEdit(id) { editingGameId=id; emojiPickerFor=null; renderGames(); }
+function cancelGameEdit() { editingGameId=null; renderGames(); }
+
+async function saveGameEdit(id) {
+  const name = document.getElementById('gn-'+id)?.value.trim();
+  const fmt  = document.getElementById('gf-'+id)?.value.trim();
+  const mult = parseInt(document.getElementById('gm-'+id)?.value) || 1;
+  if (!name) { showToast('Name required!'); return; }
+  await dbPatch(`games/${id}`, { name, format:fmt, multiplier:mult });
+  editingGameId=null;
+  await fetchAll();
+  showToast('Game updated!');
+}
+
+function toggleGameEmojiPicker(id) {
+  emojiPickerFor = emojiPickerFor===id ? null : id;
+  renderGames();
+}
+
+async function setGameEmoji(id, em) {
+  await dbPatch(`games/${id}`, { emoji:em });
+  emojiPickerFor=null;
+  await fetchAll();
+}
+
+async function moveGame(id, dir) {
+  const idx = state.games.findIndex(g=>g.id===id);
+  const newIdx = idx+dir;
+  if (newIdx<0||newIdx>=state.games.length) return;
+  const a=state.games[idx], b=state.games[newIdx];
+  await dbPatch(`games/${a.id}`, { order: b.order??newIdx });
+  await dbPatch(`games/${b.id}`, { order: a.order??idx });
+  await fetchAll();
+}
+
+async function removeGame(id) {
+  if (!confirm('Remove this game? Existing match records referencing it will remain.')) return;
+  await dbDelete(`games/${id}`);
+  await fetchAll();
+  showToast('Game removed.');
+}
+
+// ════════════════════════════════
+//  PLAYER ACTIONS
+// ════════════════════════════════
+async function addPlayer() {
+  const input=document.getElementById('new-player-name');
+  const name=input.value.trim();
+  if (!name) { showToast('Enter a name!'); return; }
+  if (state.players.length>=12) { showToast('Max 12 players!'); return; }
+  if (state.players.find(p=>p.name.toLowerCase()===name.toLowerCase())) { showToast('Name taken!'); return; }
+  const id='p'+Date.now();
+  await dbSet(`players/${id}`, { id, name, emoji:PEMOJIS[state.players.length%PEMOJIS.length] });
+  input.value='';
+  await fetchAll();
+  showToast(name+' joined the Borchlympics!');
+}
+
+async function removePlayer(id) {
+  if (state.players.length<=2) { showToast('Need at least 2 players!'); return; }
+  if (!confirm('Remove this player?')) return;
+  await dbDelete(`players/${id}`);
+  await fetchAll();
+  showToast('Player removed.');
+}
+
+// ════════════════════════════════
+//  UI HELPERS
+// ════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const order=['standings','matches','games','hof','players','admin'];
+  document.querySelectorAll('.tab')[order.indexOf(name)]?.classList.add('active');
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  try {
+    const [y,m,day] = d.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+  } catch { return d; }
+}
+</script>
+</body>
+</html>
