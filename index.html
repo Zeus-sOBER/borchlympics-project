@@ -281,136 +281,158 @@
   .match-card.over-limit { border-color:var(--accent2); opacity:.75; }
   .match-card.over-limit .match-game { color:var(--muted); }
 
+  /* ── TAB LABEL VISIBILITY ── */
+  /* Desktop: show full emoji + label */
+  .tab-icon { display:inline; }
+  .tab-label { display:inline; }
+
   /* ── MOBILE ── */
   @media(max-width:600px) {
-    /* Base sizing — 16px prevents iOS zoom on inputs */
     body { font-size:15px; }
     .page { padding:12px 10px; }
 
-    /* Header — shrink padding on small screens */
-    .header { padding:18px 14px 14px; }
-    .header .sub { font-size:10px; letter-spacing:2px; }
+    /* ── HEADER ── */
+    .header { padding:16px 12px 12px; }
+    .header h1 { font-size:clamp(34px,10vw,56px); letter-spacing:3px; }
+    .header .sub { font-size:9px; letter-spacing:2px; }
+    .season-badge, .live-badge, .no-season-badge { font-size:10px; padding:3px 9px; }
 
-    /* Nav tabs — bigger tap area, emoji-first on very small */
+    /* ── TABS: emoji on top, short label below ── */
     .tabs { -webkit-overflow-scrolling:touch; }
-    .tab { padding:14px 10px; font-size:10px; letter-spacing:1px; min-width:52px; text-align:center; }
+    .tab {
+      padding:8px 6px 6px;
+      font-size:9px;
+      letter-spacing:0.5px;
+      min-width:44px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:2px;
+      text-align:center;
+    }
+    .tab-icon { font-size:18px; line-height:1; display:block; }
+    .tab-label { display:block; font-size:9px; letter-spacing:0.5px; }
 
-    /* Cards */
-    .card { padding:14px 12px; }
+    /* ── CARDS ── */
+    .card { padding:14px 12px; border-radius:10px; }
     .card-title { font-size:10px; }
 
-    /* Podium — stack tighter on tiny screens */
-    .standings-podium { gap:6px; padding:8px 0 0; }
-    .podium-slot { max-width:110px; }
-    .podium-avatar { width:42px; height:42px; font-size:18px; }
-    .podium-name { font-size:11px; }
+    /* ── SECTION TITLES ── */
+    .section-title { font-size:20px; letter-spacing:2px; margin-bottom:10px; }
+
+    /* ── PODIUM ── */
+    .standings-podium { gap:4px; padding:8px 0 0; margin-bottom:16px; }
+    .podium-slot { max-width:none; flex:1; }
+    .podium-avatar { width:40px; height:40px; font-size:18px; margin-bottom:4px; }
+    .podium-name { font-size:11px; margin-bottom:1px; }
     .podium-pts { font-size:10px; }
-    .p1 .podium-block { height:60px; font-size:22px; }
-    .p2 .podium-block { height:44px; font-size:20px; }
-    .p3 .podium-block { height:32px; font-size:18px; }
+    /* Use text instead of emoji for medal blocks to avoid rendering issues */
+    .p1 .podium-block { height:56px; font-size:18px; font-family:'Bebas Neue',sans-serif; }
+    .p2 .podium-block { height:40px; font-size:16px; font-family:'Bebas Neue',sans-serif; }
+    .p3 .podium-block { height:28px; font-size:14px; font-family:'Bebas Neue',sans-serif; }
 
-    /* Standings table — hide Wins column, tighten padding */
-    .stn-table th, .stn-table td { padding:9px 8px; font-size:12px; }
+    /* ── STANDINGS TABLE ── */
+    .stn-table th, .stn-table td { padding:9px 6px; font-size:12px; }
+    /* Hide Wins col on mobile */
     .stn-table th:last-child, .stn-table td:last-child { display:none; }
+    .rbadge { width:22px; height:22px; font-size:11px; }
 
-    /* Section titles */
-    .section-title { font-size:22px; letter-spacing:2px; margin-bottom:12px; }
-
-    /* All buttons — thumb-friendly 44px minimum */
-    .btn { padding:13px 16px; min-height:44px; font-size:14px; border-radius:10px; }
-    .btn-sm { padding:11px 14px; min-height:42px; font-size:13px; }
+    /* ── BUTTONS ── */
+    .btn { padding:13px 14px; min-height:44px; font-size:14px; border-radius:10px; }
+    .btn-sm { padding:11px 13px; min-height:42px; font-size:13px; }
     .btn-row { gap:8px; }
-    .btn-row .btn { flex:1; min-width:0; text-align:center; justify-content:center; }
-    .icon-btn { padding:9px 11px; min-height:38px; min-width:38px; font-size:14px; }
+    .btn-row .btn { flex:1; min-width:0; text-align:center; }
+    .icon-btn { padding:9px 10px; min-height:38px; min-width:38px; font-size:14px; }
 
-    /* Inputs — 16px prevents iOS zoom */
-    input[type="text"], input[type="date"] { padding:13px 14px; min-height:44px; font-size:16px; }
+    /* ── INPUTS (16px stops iOS zoom) ── */
+    input[type="text"], input[type="date"] { padding:13px 12px; min-height:44px; font-size:16px; }
     .setup-input { padding:14px; font-size:16px; }
-    .form-select, .place-select { padding:13px 12px; min-height:44px; font-size:16px; }
+    .form-select, .place-select { padding:13px 10px; min-height:44px; font-size:16px; }
     .setup-btn { padding:16px; font-size:16px; min-height:52px; }
+    input[type="number"] { font-size:16px; }
 
-    /* Player chips — bigger on mobile */
-    .player-chip { padding:10px 14px; min-height:44px; font-size:14px; }
-    .player-chips { gap:8px; }
+    /* ── PLAYER CHIPS ── */
+    .player-chip { padding:10px 13px; min-height:44px; font-size:14px; }
+    .player-chips { gap:7px; }
 
-    /* Place rows — stack label above select */
-    .place-row { flex-direction:column; align-items:stretch; gap:5px; }
+    /* ── PLACE ROWS ── */
+    .place-row { flex-direction:column; align-items:stretch; gap:4px; }
     .place-label { width:auto; font-size:13px; font-weight:600; color:var(--text); }
 
-    /* Match log form */
+    /* ── MATCH LOG FORM ── */
     .log-form { padding:14px 12px; }
     .form-row { flex-direction:column; gap:10px; }
     .form-row > * { min-width:unset; }
 
-    /* Match cards */
+    /* ── MATCH CARDS ── */
     .match-card { padding:12px; }
     .match-header { flex-wrap:wrap; gap:6px; }
     .match-game { font-size:13px; width:100%; }
     .match-results { gap:6px; }
     .match-result-chip { font-size:11px; padding:4px 8px; }
 
-    /* Game cards */
-    .game-card { padding:12px; }
-    .game-actions { flex-shrink:0; gap:4px; }
+    /* ── GAME CARDS ── */
+    .game-card { padding:12px; margin-bottom:8px; }
+    .game-actions { gap:4px; }
     .game-edit-row { flex-direction:column; }
     .game-edit-row input, .game-edit-row select { min-width:unset; width:100%; }
 
-    /* HOF */
-    .hof-card { padding:14px; gap:10px; flex-wrap:wrap; }
-    .hof-pts { font-size:22px; }
+    /* ── HOF ── */
+    .hof-card { padding:12px; gap:10px; flex-wrap:wrap; }
+    .hof-pts { font-size:22px; margin-left:0; }
+    .hof-season { font-size:16px; }
 
-    /* Round-robin matchups — stack winner buttons */
+    /* ── ROUND ROBIN ── */
     .rr-matchup { flex-direction:column; align-items:stretch; gap:8px; padding:12px; }
     .rr-vs { font-size:14px; }
+    .rr-table th, .rr-table td { padding:8px 8px; font-size:12px; }
 
-    /* Finals */
+    /* ── FINALS ── */
     .finals-card { padding:14px 12px; }
-    .finals-teams { gap:10px; justify-content:center; }
-    .finals-team-wins { font-size:52px; }
+    .finals-teams { gap:8px; justify-content:center; }
+    .finals-team-wins { font-size:48px; }
     .finals-game { flex-wrap:wrap; gap:8px; padding:10px 12px; }
     .finals-game-num { width:auto; }
     .finals-game-btn { width:100%; display:flex; gap:8px; }
     .finals-game-btn .btn { flex:1; }
 
-    /* Tournament sub-tabs */
+    /* ── TOURNAMENT TABS ── */
     .tourn-tabs { -webkit-overflow-scrolling:touch; flex-wrap:nowrap; }
     .tourn-tab { padding:10px 12px; min-height:40px; font-size:11px; }
-
-    /* Tournament setup */
     .tourn-setup { padding:14px 12px; }
 
-    /* Winner banner */
-    .winner-banner { padding:18px 12px; }
-    .winner-banner-crown { font-size:40px; }
-    .winner-banner-name { font-size:26px; }
+    /* ── WINNER BANNER ── */
+    .winner-banner { padding:16px 12px; }
+    .winner-banner-crown { font-size:36px; }
+    .winner-banner-name { font-size:24px; }
 
-    /* Admin */
+    /* ── ADMIN ── */
     .season-info { padding:14px 12px; }
-    .season-name-display { font-size:22px; letter-spacing:2px; }
+    .season-name-display { font-size:20px; letter-spacing:1px; }
 
-    /* Players */
+    /* ── PLAYERS ── */
     .player-item { padding:10px 12px; }
     .player-avatar { width:36px; height:36px; font-size:17px; }
     .player-name { font-size:13px; }
 
-    /* Limit bar */
-    .limit-bar-wrap { height:5px; margin-top:6px; }
+    /* ── TOAST ── */
+    .toast { width:calc(100% - 24px); text-align:center; white-space:normal; font-size:13px; bottom:12px; }
 
-    /* Toast — full width on mobile */
-    .toast { width:calc(100% - 32px); text-align:center; white-space:normal; font-size:13px; bottom:16px; }
-
-    /* Misc helpers */
+    /* ── MISC ── */
     .mult-badge { font-size:9px; padding:2px 5px; }
-    .adv-badge, .elim-badge { font-size:9px; }
-    .over-limit-badge { font-size:9px; }
+    .adv-badge, .elim-badge, .over-limit-badge { font-size:9px; }
+    .limit-bar-wrap { height:5px; margin-top:6px; }
   }
 
-  /* Extra tiny phones */
-  @media(max-width:360px) {
-    .tab { padding:12px 7px; font-size:9px; }
-    .btn { font-size:13px; padding:12px 12px; }
-    .standings-podium { gap:4px; }
-    .podium-slot { max-width:90px; }
+  /* ── EXTRA TINY (iPhone SE etc) ── */
+  @media(max-width:375px) {
+    .tab { min-width:38px; padding:7px 4px 5px; }
+    .tab-icon { font-size:16px; }
+    .tab-label { font-size:8px; }
+    .btn { font-size:13px; padding:12px 10px; }
+    .podium-avatar { width:34px; height:34px; font-size:15px; }
+    .podium-name { font-size:10px; }
   }
 
   @media(max-width:480px) {
@@ -466,13 +488,27 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="showPage('standings')">🏆 Standings</div>
-    <div class="tab" onclick="showPage('matches')">⚔️ Matches</div>
-    <div class="tab" onclick="showPage('tournament')">🏟️ Tournament</div>
-    <div class="tab" onclick="showPage('games')">🎮 Games</div>
-    <div class="tab" onclick="showPage('hof')">🎖️ Hall of Fame</div>
-    <div class="tab" onclick="showPage('players')">👥 Players</div>
-    <div class="tab" onclick="showPage('admin')">⚙️ Admin</div>
+    <div class="tab active" onclick="showPage('standings')">
+      <span class="tab-icon">🏆</span><span class="tab-label"> Standings</span>
+    </div>
+    <div class="tab" onclick="showPage('matches')">
+      <span class="tab-icon">⚔️</span><span class="tab-label"> Matches</span>
+    </div>
+    <div class="tab" onclick="showPage('tournament')">
+      <span class="tab-icon">🏟️</span><span class="tab-label"> Tournament</span>
+    </div>
+    <div class="tab" onclick="showPage('games')">
+      <span class="tab-icon">🎮</span><span class="tab-label"> Games</span>
+    </div>
+    <div class="tab" onclick="showPage('hof')">
+      <span class="tab-icon">🎖️</span><span class="tab-label"> HOF</span>
+    </div>
+    <div class="tab" onclick="showPage('players')">
+      <span class="tab-icon">👥</span><span class="tab-label"> Players</span>
+    </div>
+    <div class="tab" onclick="showPage('admin')">
+      <span class="tab-icon">⚙️</span><span class="tab-label"> Admin</span>
+    </div>
   </div>
 
   <!-- ══ STANDINGS ══ -->
@@ -946,13 +982,13 @@ function renderStandings() {
 
   // Podium
   const order = [ranked[1], ranked[0], ranked[2]].filter(Boolean);
-  const cls = ['p2','p1','p3'], medals = ['🥈','🥇','🥉'];
+  const cls = ['p2','p1','p3'], blockLabels = ['2','1','3'];
   document.getElementById('podium-area').innerHTML = '<div class="standings-podium">' +
     order.map((p,i) => `<div class="podium-slot ${cls[i]}">
       <div class="podium-avatar">${p.emoji}</div>
       <div class="podium-name">${escHtml(p.name)}</div>
       <div class="podium-pts">${p.pts} pts</div>
-      <div class="podium-block">${medals[i]}</div></div>`).join('') + '</div>';
+      <div class="podium-block">${blockLabels[i]}</div></div>`).join('') + '</div>';
 
   // Table
   const rC = ['r1','r2','r3'];
