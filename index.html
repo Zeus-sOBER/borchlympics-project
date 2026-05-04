@@ -297,22 +297,28 @@
     .header .sub { font-size:9px; letter-spacing:2px; }
     .season-badge, .live-badge, .no-season-badge { font-size:10px; padding:3px 9px; }
 
-    /* ── TABS: emoji on top, short label below ── */
-    .tabs { -webkit-overflow-scrolling:touch; }
+    /* ── TABS: scrollable, fixed width per tab ── */
+    .tabs {
+      -webkit-overflow-scrolling:touch;
+      overflow-x:auto;
+      overflow-y:hidden;
+      display:flex;
+      flex-wrap:nowrap;
+      justify-content:flex-start;
+    }
     .tab {
-      padding:8px 6px 6px;
-      font-size:9px;
-      letter-spacing:0.5px;
-      min-width:44px;
-      flex:1;
+      flex:0 0 auto;
+      width:72px;
+      padding:10px 4px 8px;
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:2px;
+      gap:3px;
       text-align:center;
+      letter-spacing:0;
     }
-    .tab-icon { font-size:18px; line-height:1; display:block; }
-    .tab-label { display:block; font-size:9px; letter-spacing:0.5px; }
+    .tab-icon { font-size:20px; line-height:1; display:block; }
+    .tab-label { display:block; font-size:9.5px; font-weight:700; letter-spacing:0.3px; white-space:nowrap; }
 
     /* ── CARDS ── */
     .card { padding:14px 12px; border-radius:10px; }
@@ -427,9 +433,6 @@
 
   /* ── EXTRA TINY (iPhone SE etc) ── */
   @media(max-width:375px) {
-    .tab { min-width:38px; padding:7px 4px 5px; }
-    .tab-icon { font-size:16px; }
-    .tab-label { font-size:8px; }
     .btn { font-size:13px; padding:12px 10px; }
     .podium-avatar { width:34px; height:34px; font-size:15px; }
     .podium-name { font-size:10px; }
