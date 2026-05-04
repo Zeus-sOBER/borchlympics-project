@@ -773,9 +773,13 @@ function disconnectFirebase() {
   location.reload();
 }
 
+const DEFAULT_DB = 'https://borchlympics-default-rtdb.firebaseio.com';
+
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('borchlympics_db');
-  if (saved) { document.getElementById('db-url').value = saved; DB_URL = saved.replace(/\/$/, ''); launchApp(saved); }
+  const saved = localStorage.getItem('borchlympics_db') || DEFAULT_DB;
+  document.getElementById('db-url').value = saved;
+  DB_URL = saved.replace(/\/$/, '');
+  launchApp(saved);
 });
 
 function buildEmojiPicker() {
