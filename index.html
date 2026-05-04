@@ -2,10 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <title>🏆 THE BORCHLYMPICS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap"></noscript>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Borchlympics">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+  /* Fonts loaded async via <link> in <head> — fallback stacks below */
+  @font-face { font-family:'Bebas Neue'; font-display:swap; }
+  @font-face { font-family:'Inter'; font-display:swap; }
 
   :root {
     --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32;
@@ -14,8 +29,11 @@
     --text: #e8e8f0; --muted: #666680; --border: #2a2a3a;
     --orange: #ff9800;
   }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh;
+         padding-bottom:env(safe-area-inset-bottom); -webkit-font-smoothing:antialiased; }
+  /* Sticky tabs clear notch on scroll */
+  .tabs { position:sticky; top:0; z-index:100; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right); }
 
   /* SETUP */
   #setup-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:radial-gradient(ellipse at center,#1a0a2e 0%,var(--bg) 70%); }
@@ -54,7 +72,7 @@
   /* TABS */
   .tabs { display:flex; background:var(--card); border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
   .tabs::-webkit-scrollbar { display:none; }
-  .tab { padding:14px 14px; cursor:pointer; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .2s; }
+  .tab { padding:14px 14px; cursor:pointer; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all .2s; touch-action:manipulation; }
   .tab:hover { color:var(--text); }
   .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
 
@@ -128,7 +146,7 @@
   .place-select:focus { border-color:var(--accent); }
   /* PLAYER PICKER CHIPS */
   .player-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px; }
-  .player-chip { display:flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:13px; font-weight:500; transition:all .18s; user-select:none; }
+  .player-chip { display:flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:13px; font-weight:500; transition:all .18s; user-select:none; touch-action:manipulation; }
   .player-chip:hover { border-color:var(--accent); }
   .player-chip.selected { background:rgba(108,99,255,.18); border-color:var(--accent); color:var(--text); }
   .player-chip .chip-check { width:14px; height:14px; border-radius:50%; border:1.5px solid var(--muted); display:inline-flex; align-items:center; justify-content:center; font-size:9px; flex-shrink:0; transition:all .18s; }
@@ -144,7 +162,7 @@
   .game-name { font-weight:600; font-size:14px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
   .game-format { font-size:11px; color:var(--muted); margin-top:2px; }
   .game-actions { display:flex; gap:5px; flex-shrink:0; }
-  .icon-btn { background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted); padding:5px 8px; cursor:pointer; font-size:12px; transition:all .2s; font-family:inherit; line-height:1; }
+  .icon-btn { background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted); padding:5px 8px; cursor:pointer; font-size:12px; transition:all .2s; font-family:inherit; line-height:1; touch-action:manipulation; }
   .icon-btn:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
   .icon-btn.del:hover:not(:disabled) { border-color:var(--accent2); color:var(--accent2); }
   .icon-btn:disabled { opacity:.3; cursor:not-allowed; }
@@ -173,7 +191,7 @@
   .season-dates { font-size:12px; color:var(--muted); margin-top:4px; }
 
   /* BUTTONS */
-  .btn { padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-size:13px; font-weight:600; letter-spacing:.5px; font-family:inherit; transition:all .2s; }
+  .btn { padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-size:13px; font-weight:600; letter-spacing:.5px; font-family:inherit; transition:all .2s; touch-action:manipulation; }
   .btn-primary { background:var(--accent); color:#fff; }
   .btn-primary:hover { background:#7c74ff; transform:translateY(-1px); }
   .btn-secondary { background:var(--card2); color:var(--text); border:1px solid var(--border); }
@@ -244,6 +262,15 @@
   .adv-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(255,215,0,.12); border:1px solid var(--gold); border-radius:20px; padding:2px 8px; font-size:10px; color:var(--gold); font-weight:700; }
   .elim-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(255,101,132,.1); border:1px solid var(--accent2); border-radius:20px; padding:2px 8px; font-size:10px; color:var(--accent2); font-weight:700; }
 
+  /* TOURNAMENT SUB-TABS */
+  .tourn-tabs { display:flex; background:var(--card2); border-radius:10px; padding:4px; gap:4px; margin-bottom:16px; overflow-x:auto; scrollbar-width:none; flex-wrap:nowrap; }
+  .tourn-tabs::-webkit-scrollbar { display:none; }
+  .tourn-tab { padding:8px 14px; border-radius:7px; cursor:pointer; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--muted); white-space:nowrap; transition:all .18s; border:1px solid transparent; touch-action:manipulation; }
+  .tourn-tab:hover { color:var(--text); }
+  .tourn-tab.active { background:var(--card); color:var(--accent); border-color:var(--border); }
+  .tourn-tab.complete { color:var(--gold); }
+  .tourn-tab.new-tab { color:var(--accent); }
+
   /* MATCH LIMIT */
   .limit-bar-wrap { background:var(--border); border-radius:4px; height:4px; margin-top:5px; width:100%; }
   .limit-bar-fill { height:100%; border-radius:4px; transition:width .4s; }
@@ -254,7 +281,142 @@
   .match-card.over-limit { border-color:var(--accent2); opacity:.75; }
   .match-card.over-limit .match-game { color:var(--muted); }
 
-  @media(max-width:480px) { .page{padding:14px 10px;} .form-row>*{min-width:100%;} }
+  /* ── MOBILE ── */
+  @media(max-width:600px) {
+    /* Base sizing — 16px prevents iOS zoom on inputs */
+    body { font-size:15px; }
+    .page { padding:12px 10px; }
+
+    /* Header — shrink padding on small screens */
+    .header { padding:18px 14px 14px; }
+    .header .sub { font-size:10px; letter-spacing:2px; }
+
+    /* Nav tabs — bigger tap area, emoji-first on very small */
+    .tabs { -webkit-overflow-scrolling:touch; }
+    .tab { padding:14px 10px; font-size:10px; letter-spacing:1px; min-width:52px; text-align:center; }
+
+    /* Cards */
+    .card { padding:14px 12px; }
+    .card-title { font-size:10px; }
+
+    /* Podium — stack tighter on tiny screens */
+    .standings-podium { gap:6px; padding:8px 0 0; }
+    .podium-slot { max-width:110px; }
+    .podium-avatar { width:42px; height:42px; font-size:18px; }
+    .podium-name { font-size:11px; }
+    .podium-pts { font-size:10px; }
+    .p1 .podium-block { height:60px; font-size:22px; }
+    .p2 .podium-block { height:44px; font-size:20px; }
+    .p3 .podium-block { height:32px; font-size:18px; }
+
+    /* Standings table — hide Wins column, tighten padding */
+    .stn-table th, .stn-table td { padding:9px 8px; font-size:12px; }
+    .stn-table th:last-child, .stn-table td:last-child { display:none; }
+
+    /* Section titles */
+    .section-title { font-size:22px; letter-spacing:2px; margin-bottom:12px; }
+
+    /* All buttons — thumb-friendly 44px minimum */
+    .btn { padding:13px 16px; min-height:44px; font-size:14px; border-radius:10px; }
+    .btn-sm { padding:11px 14px; min-height:42px; font-size:13px; }
+    .btn-row { gap:8px; }
+    .btn-row .btn { flex:1; min-width:0; text-align:center; justify-content:center; }
+    .icon-btn { padding:9px 11px; min-height:38px; min-width:38px; font-size:14px; }
+
+    /* Inputs — 16px prevents iOS zoom */
+    input[type="text"], input[type="date"] { padding:13px 14px; min-height:44px; font-size:16px; }
+    .setup-input { padding:14px; font-size:16px; }
+    .form-select, .place-select { padding:13px 12px; min-height:44px; font-size:16px; }
+    .setup-btn { padding:16px; font-size:16px; min-height:52px; }
+
+    /* Player chips — bigger on mobile */
+    .player-chip { padding:10px 14px; min-height:44px; font-size:14px; }
+    .player-chips { gap:8px; }
+
+    /* Place rows — stack label above select */
+    .place-row { flex-direction:column; align-items:stretch; gap:5px; }
+    .place-label { width:auto; font-size:13px; font-weight:600; color:var(--text); }
+
+    /* Match log form */
+    .log-form { padding:14px 12px; }
+    .form-row { flex-direction:column; gap:10px; }
+    .form-row > * { min-width:unset; }
+
+    /* Match cards */
+    .match-card { padding:12px; }
+    .match-header { flex-wrap:wrap; gap:6px; }
+    .match-game { font-size:13px; width:100%; }
+    .match-results { gap:6px; }
+    .match-result-chip { font-size:11px; padding:4px 8px; }
+
+    /* Game cards */
+    .game-card { padding:12px; }
+    .game-actions { flex-shrink:0; gap:4px; }
+    .game-edit-row { flex-direction:column; }
+    .game-edit-row input, .game-edit-row select { min-width:unset; width:100%; }
+
+    /* HOF */
+    .hof-card { padding:14px; gap:10px; flex-wrap:wrap; }
+    .hof-pts { font-size:22px; }
+
+    /* Round-robin matchups — stack winner buttons */
+    .rr-matchup { flex-direction:column; align-items:stretch; gap:8px; padding:12px; }
+    .rr-vs { font-size:14px; }
+
+    /* Finals */
+    .finals-card { padding:14px 12px; }
+    .finals-teams { gap:10px; justify-content:center; }
+    .finals-team-wins { font-size:52px; }
+    .finals-game { flex-wrap:wrap; gap:8px; padding:10px 12px; }
+    .finals-game-num { width:auto; }
+    .finals-game-btn { width:100%; display:flex; gap:8px; }
+    .finals-game-btn .btn { flex:1; }
+
+    /* Tournament sub-tabs */
+    .tourn-tabs { -webkit-overflow-scrolling:touch; flex-wrap:nowrap; }
+    .tourn-tab { padding:10px 12px; min-height:40px; font-size:11px; }
+
+    /* Tournament setup */
+    .tourn-setup { padding:14px 12px; }
+
+    /* Winner banner */
+    .winner-banner { padding:18px 12px; }
+    .winner-banner-crown { font-size:40px; }
+    .winner-banner-name { font-size:26px; }
+
+    /* Admin */
+    .season-info { padding:14px 12px; }
+    .season-name-display { font-size:22px; letter-spacing:2px; }
+
+    /* Players */
+    .player-item { padding:10px 12px; }
+    .player-avatar { width:36px; height:36px; font-size:17px; }
+    .player-name { font-size:13px; }
+
+    /* Limit bar */
+    .limit-bar-wrap { height:5px; margin-top:6px; }
+
+    /* Toast — full width on mobile */
+    .toast { width:calc(100% - 32px); text-align:center; white-space:normal; font-size:13px; bottom:16px; }
+
+    /* Misc helpers */
+    .mult-badge { font-size:9px; padding:2px 5px; }
+    .adv-badge, .elim-badge { font-size:9px; }
+    .over-limit-badge { font-size:9px; }
+  }
+
+  /* Extra tiny phones */
+  @media(max-width:360px) {
+    .tab { padding:12px 7px; font-size:9px; }
+    .btn { font-size:13px; padding:12px 12px; }
+    .standings-podium { gap:4px; }
+    .podium-slot { max-width:90px; }
+  }
+
+  @media(max-width:480px) {
+    .header { padding:16px 16px 14px; }
+    .header h1 { font-size: clamp(32px, 10vw, 60px); letter-spacing:3px; }
+  }
 </style>
 </head>
 <body>
@@ -327,8 +489,14 @@
       <div id="podium-area"></div>
       <div class="card">
         <div class="card-title">Full Leaderboard</div>
-        <table class="stn-table">
-          <thead><tr><th>Rank</th><th>Player</th><th>Pts</th><th>Matches</th><th>Wins</th></tr></thead>
+        <table class="stn-table" style="table-layout:fixed;width:100%;">
+          <thead><tr>
+            <th style="width:42px;">Rank</th>
+            <th>Player</th>
+            <th style="width:52px;">Pts</th>
+            <th style="width:90px;">Matches</th>
+            <th style="width:48px;">Wins</th>
+          </tr></thead>
           <tbody id="standings-body"></tbody>
         </table>
       </div>
@@ -522,6 +690,7 @@ const EMOJI_LIST = ['🎮','🕹️','👾','🏈','⚽','🏀','🎯','🥊','�
 let DB_URL = '';
 let state = { players:[], games:[], matches:[], activeSeason:null, hof:[], matchLimit:0, tournaments:[] };
 let tournamentSelectedPlayers = new Set();
+let activeTournamentTab = null; // tournament ID or null for "new" form
 let editingGameId = null;
 let emojiPickerFor = null;
 let addGameFormOpen = false;
@@ -1315,53 +1484,84 @@ function renderTournament() {
     return;
   }
 
-  const tourn = getActiveTournament();
-  const completedTourneys = state.tournaments.filter(t => t.seasonId === state.activeSeason.id && t.status === 'complete');
+  const seasonTournaments = state.tournaments.filter(t => t.seasonId === state.activeSeason.id);
 
-  if (!tourn) {
-    // Show setup form + any completed tournaments
-    let html = `
-      <div class="tourn-setup">
-        <div class="card-title" style="margin-bottom:14px;">Create Tournament</div>
-        <div style="margin-bottom:12px;">
-          <span class="form-label">Game</span>
-          <select class="form-select" id="tourn-game" style="margin-bottom:0;">
-            <option value="">— Select game —</option>
-            ${state.games.map(g => `<option value="${g.id}">${g.emoji} ${escHtml(g.name)}</option>`).join('')}
-          </select>
-        </div>
-        <div style="margin-bottom:12px;">
-          <span class="form-label">Select Players</span>
-          <div id="tourn-player-chips" class="player-chips">
-            ${state.players.map(p => `
-              <div class="player-chip" id="tc-${p.id}" onclick="toggleTournamentChip('${p.id}')">
-                <span class="chip-check"></span>
-                <span>${p.emoji} ${escHtml(p.name)}</span>
-              </div>`).join('')}
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
-          Round-robin: every player plays every other player once. Top 2 by wins advance to a <strong style="color:var(--gold);">Best-of-3 Finals</strong> — games count as 5× season points.
-        </div>
-        <button class="btn btn-primary" onclick="createTournament()">🏟️ Create Tournament</button>
-      </div>`;
-
-    if (completedTourneys.length > 0) {
-      html += completedTourneys.map(t => renderCompletedTournament(t)).join('');
-    } else {
-      html += '<div class="empty-state" style="padding:20px 0;"><div class="big">🏆</div>No tournaments yet this season.</div>';
-    }
-    container.innerHTML = html;
-    // Re-apply chip selection state
-    tournamentSelectedPlayers.forEach(id => {
-      const chip = document.getElementById('tc-'+id);
-      if (chip) chip.classList.add('selected');
-    });
-    return;
+  // Auto-select first tournament if current tab is gone
+  if (activeTournamentTab && !seasonTournaments.find(t => t.id === activeTournamentTab)) {
+    activeTournamentTab = seasonTournaments[0]?.id || null;
   }
 
-  // Render active tournament
-  container.innerHTML = renderActiveTournament(tourn);
+  let html = '';
+
+  if (seasonTournaments.length > 0) {
+    // Build sub-tab bar
+    html += '<div class="tourn-tabs">';
+    seasonTournaments.forEach(t => {
+      const isComplete = t.status === 'complete';
+      const isActive = activeTournamentTab === t.id;
+      html += `<div class="tourn-tab${isActive?' active':''}${isComplete?' complete':''}" onclick="selectTournTab('${t.id}')">
+        ${t.gameEmoji} ${escHtml(t.gameName)}${isComplete?' 🏆':''}
+      </div>`;
+    });
+    // New tournament tab
+    html += `<div class="tourn-tab new-tab${activeTournamentTab===null?' active':''}" onclick="selectTournTab(null)">＋ New</div>`;
+    html += '</div>';
+  }
+
+  // Content area
+  if (activeTournamentTab === null || seasonTournaments.length === 0) {
+    html += renderNewTournamentForm();
+    const completed = seasonTournaments.filter(t => t.status === 'complete');
+    if (completed.length > 0 && seasonTournaments.length === 0) {
+      html += completed.map(t => renderCompletedTournament(t)).join('');
+    } else if (seasonTournaments.length === 0) {
+      html += '<div class="empty-state" style="padding:20px 0;"><div class="big">🏆</div>No tournaments yet this season.</div>';
+    }
+  } else {
+    const tourn = seasonTournaments.find(t => t.id === activeTournamentTab);
+    if (tourn) html += renderOneTournament(tourn);
+  }
+
+  container.innerHTML = html;
+
+  // Re-apply chip selection for new tournament form
+  tournamentSelectedPlayers.forEach(id => {
+    const chip = document.getElementById('tc-'+id);
+    if (chip) { chip.classList.add('selected'); chip.querySelector('.chip-check').textContent = '✓'; }
+  });
+}
+
+function selectTournTab(id) {
+  activeTournamentTab = id;
+  renderTournament();
+}
+
+function renderNewTournamentForm() {
+  return `
+    <div class="tourn-setup">
+      <div class="card-title" style="margin-bottom:14px;">Create Tournament</div>
+      <div style="margin-bottom:12px;">
+        <span class="form-label">Game</span>
+        <select class="form-select" id="tourn-game" style="margin-bottom:0;">
+          <option value="">— Select game —</option>
+          ${state.games.map(g => `<option value="${g.id}">${g.emoji} ${escHtml(g.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="form-label">Select Players</span>
+        <div id="tourn-player-chips" class="player-chips">
+          ${state.players.map(p => `
+            <div class="player-chip" id="tc-${p.id}" onclick="toggleTournamentChip('${p.id}')">
+              <span class="chip-check"></span>
+              <span>${p.emoji} ${escHtml(p.name)}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+        Round-robin: every player plays every other player once. Top 2 by wins advance to a <strong style="color:var(--gold);">Best-of-3 Finals</strong> — games count as 5× season points.
+      </div>
+      <button class="btn btn-primary" onclick="createTournament()">🏟️ Create Tournament</button>
+    </div>`;
 }
 
 function toggleTournamentChip(playerId) {
@@ -1402,11 +1602,12 @@ async function createTournament() {
 
   await dbSet(`tournaments/${tourn.id}`, tourn);
   tournamentSelectedPlayers = new Set();
+  activeTournamentTab = tourn.id; // Auto-switch to new tournament
   await fetchAll();
   showToast(`🏟️ ${game.name} Tournament created!`);
 }
 
-function renderActiveTournament(tourn) {
+function renderOneTournament(tourn) {
   const game = state.games.find(g => g.id === tourn.gameId);
   const rrStandings = getTournamentStandings(tourn);
 
