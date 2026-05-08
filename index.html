@@ -2596,7 +2596,7 @@ function renderBgaRounds() {
       container.innerHTML = state.players.map(p => `
         <div class="bga-score-row">
           <div style="flex:1;font-size:13px;">${p.emoji} <strong>${escHtml(p.name)}</strong></div>
-          <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="1" max="200" placeholder="—" />
+          <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="-50" max="200" placeholder="—" />
           <div style="font-size:11px;color:rgba(200,168,75,.5);width:50px;text-align:right;">strokes</div>
         </div>`).join('');
     }
@@ -2672,7 +2672,7 @@ function renderBgaMasters() {
           const player = state.players.find(p=>p.id===pid);
           return `<div class="bga-score-row">
             <div style="flex:1;">${player?player.emoji:''} <strong>${escHtml(player?.name||pid)}</strong></div>
-            <input class="stroke-input" type="number" id="masters-strokes-${pid}" min="1" max="200" placeholder="—" value="${scores[pid]!=null?scores[pid]:''}" />
+            <input class="stroke-input" type="number" id="masters-strokes-${pid}" min="-50" max="200" placeholder="—" value="${scores[pid]!=null?scores[pid]:''}" />
             <div style="font-size:11px;color:var(--muted);width:50px;text-align:right;">strokes</div>
           </div>`;
         }).join('')}
@@ -2924,7 +2924,7 @@ function toggleBgaLogForm(open) {
     if (container) container.innerHTML = state.players.map(p => `
       <div class="bga-score-row">
         <div style="flex:1;font-size:13px;">${p.emoji} <strong>${escHtml(p.name)}</strong></div>
-        <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="1" max="200" placeholder="—" />
+        <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="-50" max="200" placeholder="—" />
         <div style="font-size:11px;color:rgba(200,168,75,.5);width:50px;text-align:right;">strokes</div>
       </div>`).join('');
   }
@@ -2941,7 +2941,7 @@ async function logBgaRound() {
   const scores = {};
   state.players.forEach(p => {
     const val = document.getElementById('bga-strokes-'+p.id)?.value;
-    if (val && !isNaN(parseInt(val)) && parseInt(val) > 0) {
+    if (val !== '' && val !== null && !isNaN(parseInt(val))) {
       scores[p.id] = parseInt(val);
     }
   });
@@ -3028,7 +3028,7 @@ async function saveMastersScores(mastersKey) {
   const scores = {};
   (masters.qualifiers||[]).forEach(pid => {
     const val = document.getElementById('masters-strokes-'+pid)?.value;
-    if (val && !isNaN(parseInt(val)) && parseInt(val) > 0) {
+    if (val !== '' && val !== null && !isNaN(parseInt(val))) {
       scores[pid] = parseInt(val);
     }
   });
@@ -3044,7 +3044,7 @@ async function crownMastersChampion(mastersKey) {
   const scores = { ...(masters.scores||{}) };
   (masters.qualifiers||[]).forEach(pid => {
     const val = document.getElementById('masters-strokes-'+pid)?.value;
-    if (val && !isNaN(parseInt(val)) && parseInt(val) > 0) {
+    if (val !== '' && val !== null && !isNaN(parseInt(val))) {
       scores[pid] = parseInt(val);
     }
   });
