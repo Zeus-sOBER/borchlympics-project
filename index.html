@@ -1172,17 +1172,10 @@ async function connectFirebase() {
     errEl.textContent = 'Please enter a valid Firebase Realtime Database URL.'; return;
   }
   const btn = document.getElementById('connect-btn');
-  btn.disabled = true; btn.textContent = 'Connecting...';
+  btn.disabled = true; btn.textContent = 'Launching...';
   DB_URL = raw;
-  try {
-    const res = await fetch(`${raw}/.json`);
-    if (!res.ok) throw new Error(`Status ${res.status}`);
-    localStorage.setItem('borchlympics_db', raw);
-    launchApp(raw);
-  } catch(e) {
-    btn.disabled = false; btn.textContent = '⚡ Connect & Launch';
-    errEl.textContent = `Could not connect: ${e.message}. Make sure rules are set to true.`;
-  }
+  localStorage.setItem('borchlympics_db', raw);
+  launchApp(raw);
 }
 
 function launchApp(url) {
@@ -1212,10 +1205,15 @@ function disconnectFirebase() {
 const DEFAULT_DB = 'https://borchlympics-default-rtdb.firebaseio.com';
 
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('borchlympics_db') || DEFAULT_DB;
-  document.getElementById('db-url').value = saved;
-  DB_URL = saved.replace(/\/$/, '');
-  launchApp(saved);
+  const saved = localStorage.getItem('borchlympics_db');
+  if (saved) {
+    document.getElementById('db-url').value = saved;
+    DB_URL = saved.replace(/\/$/, '');
+    launchApp(saved);
+  } else {
+    // Pre-fill with the known default URL so user just hits Connect
+    document.getElementById('db-url').value = DEFAULT_DB;
+  }
 });
 
 function buildEmojiPicker() {
@@ -2960,7 +2958,6 @@ async function logBgaRound() {
 
   await dbPush('bga/rounds', round);
   // Reset dropdown
-  const roundSel = document.getElementById('bga-round-name');
   if (roundSel) roundSel.value = '';
   toggleBgaLogForm(false);
   await fetchAll();
