@@ -929,12 +929,17 @@
           <div class="card-title" style="margin-bottom:14px;color:var(--flag);letter-spacing:2px;">LOG A ROUND — EA SPORTS PGA TOUR</div>
           <div class="form-row">
             <div>
-              <span class="form-label">Round Name</span>
-              <input type="text" id="bga-round-name" placeholder="e.g. Augusta National Rd 1" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;" />
+              <span class="form-label">Course / Round</span>
+              <select id="bga-round-name" style="width:100%;background:#0c1f0e;border:1px solid #2a5c30;color:#e8f5e9;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit;min-height:44px;">
+                <option value="">— Select course —</option>
+              </select>
+              <div id="bga-no-schedule-hint" style="display:none;font-size:11px;color:rgba(200,168,75,.5);margin-top:5px;">
+                ⚠️ No schedule yet — go to <strong style="color:var(--flag);">Schedule</strong> tab and randomize one first.
+              </div>
             </div>
             <div>
               <span class="form-label">Date Played</span>
-              <input type="date" id="bga-round-date" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;" />
+              <input type="date" id="bga-round-date" style="background:#0c1f0e;border:1px solid #2a5c30;color:#e8f5e9;border-radius:8px;padding:10px 12px;font-size:16px;outline:none;font-family:inherit;width:100%;min-height:44px;" />
             </div>
           </div>
           <div style="margin-bottom:14px;">
@@ -961,7 +966,8 @@
       <div class="section-title" style="color:var(--flag);font-size:22px;">📅 Season Schedule</div>
       <div class="card" style="background:#0c1f0e;border-color:#1e3a20;margin-bottom:16px;">
         <div style="font-size:12px;color:rgba(200,168,75,.7);line-height:1.8;">
-          Randomize courses from the EA Sports PGA Tour roster for your season. The <strong style="color:var(--flag);">BGA Masters</strong> is always the final round at <strong style="color:var(--flag);">St Andrews Old Course</strong>.
+          Randomize courses from the EA Sports PGA Tour roster. The <strong style="color:var(--flag);">BGA Masters</strong> is always the finale at <strong style="color:var(--flag);">St Andrews Old Course</strong>.
+          <br><span style="color:rgba(200,168,75,.5);">Once generated, your schedule populates the course dropdown in the <strong style="color:var(--flag);">Rounds</strong> tab. Already-played courses are marked ✓.</span>
         </div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;">
@@ -1110,6 +1116,7 @@ let state = { players:[], games:[], matches:[], activeSeason:null, hof:[], match
 let bgaState = { activeSeason:null, rounds:[], hof:[], masters:[] };
 let bgaActiveTab = 'standings';
 let bgaLogFormOpen = false;
+let bgaSchedule = []; // persisted schedule: [{name, loc, flag, isMasters}, ...]
 let tournamentSelectedPlayers = new Set();
 let activeTournamentTab = null; // tournament ID or null for "new" form
 let editingGameId = null;
@@ -1184,6 +1191,14 @@ function launchApp(url) {
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('cur-db-url').textContent = url;
   buildEmojiPicker();
+  // Restore saved schedule from localStorage
+  try {
+    const saved = localStorage.getItem('bga_schedule');
+    if (saved) {
+      bgaSchedule = JSON.parse(saved);
+      window._bgaLastSchedule = bgaSchedule;
+    }
+  } catch(e) {}
   initData().then(() => startPolling());
 }
 
@@ -2765,6 +2780,14 @@ function generateBgaSchedule() {
   // Always end with St Andrews Masters
   const masters = BGA_COURSES.find(c => c.isMasters);
 
+  // Persist schedule for use in the log-round dropdown
+  bgaSchedule = selected.concat([masters]);
+  window._bgaLastSchedule = bgaSchedule;
+  try { localStorage.setItem('bga_schedule', JSON.stringify(bgaSchedule)); } catch(e) {}
+
+  // Update the round-name dropdown if it's in the DOM
+  populateBgaRoundDropdown();
+
   const out = document.getElementById('bga-schedule-output');
 
   let html = `<div class="bga-schedule-card">
@@ -2798,8 +2821,39 @@ function generateBgaSchedule() {
   </div>`;
 
   out.innerHTML = html;
-  // Store for clipboard
-  window._bgaLastSchedule = selected.concat([masters]);
+}
+
+function populateBgaRoundDropdown() {
+  const sel = document.getElementById('bga-round-name');
+  const hint = document.getElementById('bga-no-schedule-hint');
+  if (!sel) return;
+
+  const prevVal = sel.value;
+
+  if (!bgaSchedule || bgaSchedule.length === 0) {
+    sel.innerHTML = '<option value="">— Select course —</option>';
+    if (hint) hint.style.display = 'block';
+    return;
+  }
+  if (hint) hint.style.display = 'none';
+
+  // Figure out which rounds have already been logged this season
+  const loggedNames = new Set(
+    getBgaSeasonRounds().map(r => r.name)
+  );
+
+  // Regular rounds only (no Masters — that goes through End Season flow)
+  const regularRounds = bgaSchedule.filter(c => !c.isMasters);
+
+  sel.innerHTML = '<option value="">— Select course —</option>' +
+    regularRounds.map((c, i) => {
+      const alreadyLogged = loggedNames.has(`${c.flag} ${c.name}`);
+      const label = `${i + 1}. ${c.flag} ${c.name}${alreadyLogged ? ' ✓' : ''}`;
+      return `<option value="${escHtml(c.flag + ' ' + c.name)}" ${alreadyLogged ? 'style="color:rgba(200,168,75,.4);"' : ''}>${label}</option>`;
+    }).join('');
+
+  // Restore previous selection if still valid
+  if (prevVal) sel.value = prevVal;
 }
 
 function copyBgaSchedule() {
@@ -2865,21 +2919,25 @@ function toggleBgaLogForm(open) {
   if (open) {
     const dateEl = document.getElementById('bga-round-date');
     if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    // Populate course dropdown from saved schedule
+    populateBgaRoundDropdown();
     // Rebuild stroke inputs fresh
     const container = document.getElementById('bga-stroke-inputs');
     if (container) container.innerHTML = state.players.map(p => `
       <div class="bga-score-row">
         <div style="flex:1;font-size:13px;">${p.emoji} <strong>${escHtml(p.name)}</strong></div>
         <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="1" max="200" placeholder="—" />
-        <div style="font-size:11px;color:var(--muted);width:50px;text-align:right;">strokes</div>
+        <div style="font-size:11px;color:rgba(200,168,75,.5);width:50px;text-align:right;">strokes</div>
       </div>`).join('');
   }
 }
 
 async function logBgaRound() {
   if (!bgaState.activeSeason) { showToast('No active BGA season!'); return; }
-  const name = document.getElementById('bga-round-name').value.trim();
+  const roundSel = document.getElementById('bga-round-name');
+  const name = roundSel ? roundSel.value.trim() : '';
   const date = document.getElementById('bga-round-date').value;
+  if (!name) { showToast('Select a course first!'); return; }
 
   // Collect scores — only include players with valid numbers
   const scores = {};
@@ -2894,14 +2952,16 @@ async function logBgaRound() {
 
   const round = {
     seasonId: bgaState.activeSeason.id,
-    name: name || 'Round ' + (getBgaSeasonRounds().length + 1),
+    name,
     date: date || new Date().toISOString().slice(0,10),
     scores,
     loggedAt: Date.now(),
   };
 
   await dbPush('bga/rounds', round);
-  document.getElementById('bga-round-name').value = '';
+  // Reset dropdown
+  const roundSel = document.getElementById('bga-round-name');
+  if (roundSel) roundSel.value = '';
   toggleBgaLogForm(false);
   await fetchAll();
   showToast('⛳ Round logged!');
