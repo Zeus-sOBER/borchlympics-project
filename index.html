@@ -281,6 +281,35 @@
   .match-card.over-limit { border-color:var(--accent2); opacity:.75; }
   .match-card.over-limit .match-game { color:var(--muted); }
 
+  /* BGA */
+  .bga-header { background:linear-gradient(135deg,#0a1a0a 0%,#0d2e0d 50%,#0a1a0a 100%); border-bottom:2px solid var(--green); padding:20px 20px 16px; text-align:center; border-radius:12px; margin-bottom:18px; }
+  .bga-logo { font-family:'Bebas Neue',sans-serif; font-size:clamp(28px,7vw,48px); letter-spacing:5px; background:linear-gradient(135deg,var(--green),#8bc34a,var(--green)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
+  .bga-sub { font-size:10px; letter-spacing:3px; color:var(--green); text-transform:uppercase; margin-top:4px; }
+  .bga-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(76,175,80,.15); border:1px solid var(--green); border-radius:20px; padding:4px 12px; font-size:11px; color:var(--green); font-weight:600; margin-top:8px; }
+  .bga-tabs { display:flex; background:var(--card2); border-radius:10px; padding:4px; gap:4px; margin-bottom:16px; overflow-x:auto; scrollbar-width:none; flex-wrap:nowrap; }
+  .bga-tabs::-webkit-scrollbar { display:none; }
+  .bga-tab { padding:8px 14px; border-radius:7px; cursor:pointer; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--muted); white-space:nowrap; transition:all .18s; border:1px solid transparent; touch-action:manipulation; }
+  .bga-tab:hover { color:var(--text); }
+  .bga-tab.active { background:var(--card); color:var(--green); border-color:var(--border); }
+  .bga-points-table { width:100%; border-collapse:collapse; }
+  .bga-points-table th { text-align:left; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); padding:8px 12px; border-bottom:1px solid var(--border); }
+  .bga-points-table td { padding:11px 12px; border-bottom:1px solid var(--border); font-size:13px; }
+  .bga-points-table tr:last-child td { border-bottom:none; }
+  .bga-points-table tr:hover td { background:var(--card2); }
+  .bga-round-card { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px; }
+  .bga-round-title { font-weight:700; font-size:14px; color:var(--green); margin-bottom:8px; }
+  .bga-score-row { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .bga-score-row:last-child { border-bottom:none; }
+  .bga-score-place { width:30px; font-weight:700; color:var(--muted); font-size:11px; }
+  .bga-score-strokes { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--text); width:36px; text-align:right; }
+  .bga-score-pts { font-size:11px; color:var(--green); font-weight:700; margin-left:auto; }
+  .bga-masters-card { background:linear-gradient(135deg,rgba(76,175,80,.08),var(--card)); border:2px solid var(--green); border-radius:14px; padding:20px; margin-bottom:16px; }
+  .bga-masters-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:3px; color:var(--green); margin-bottom:4px; }
+  .bga-hof-card { background:linear-gradient(135deg,rgba(76,175,80,.05),var(--card)); border:1px solid rgba(76,175,80,.3); border-radius:12px; padding:18px 20px; margin-bottom:12px; display:flex; align-items:center; gap:16px; }
+  .qualify-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(76,175,80,.15); border:1px solid var(--green); border-radius:20px; padding:2px 8px; font-size:10px; color:var(--green); font-weight:700; }
+  .stroke-input { width:80px; background:var(--card); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:8px 10px; font-size:16px; outline:none; font-family:inherit; text-align:center; }
+  .stroke-input:focus { border-color:var(--green); }
+
   /* ── TAB LABEL VISIBILITY ── */
   /* Desktop: show full emoji + label */
   .tab-icon { display:inline; }
@@ -509,6 +538,9 @@
     <div class="tab" onclick="showPage('players')">
       <span class="tab-icon">👥</span><span class="tab-label"> Players</span>
     </div>
+    <div class="tab" onclick="showPage('bga')">
+      <span class="tab-icon">⛳</span><span class="tab-label"> BGA</span>
+    </div>
     <div class="tab" onclick="showPage('admin')">
       <span class="tab-icon">⚙️</span><span class="tab-label"> Admin</span>
     </div>
@@ -657,6 +689,117 @@
     <div style="font-size:11px;color:var(--muted);">Supports up to 12 players. Removing a player deletes their match history.</div>
   </div>
 
+  <!-- ══ BGA ══ -->
+  <div id="page-bga" class="page">
+    <div class="bga-header">
+      <div style="font-size:32px;margin-bottom:4px;">⛳</div>
+      <div class="bga-logo">BGA</div>
+      <div class="bga-sub">Borch Golf Association</div>
+      <div id="bga-season-badge"></div>
+    </div>
+
+    <div class="bga-tabs">
+      <div class="bga-tab active" onclick="showBgaTab('standings')">🏆 Standings</div>
+      <div class="bga-tab" onclick="showBgaTab('rounds')">📋 Rounds</div>
+      <div class="bga-tab" onclick="showBgaTab('masters')">🌿 BGA Masters</div>
+      <div class="bga-tab" onclick="showBgaTab('hof')">🎖️ HOF</div>
+      <div class="bga-tab" onclick="showBgaTab('admin')">⚙️ Admin</div>
+    </div>
+
+    <!-- BGA STANDINGS -->
+    <div id="bga-tab-standings">
+      <div class="section-title" style="color:var(--green);">🏆 BGA Standings</div>
+      <div id="bga-standings-content">
+        <div class="empty-state"><div class="big">⛳</div>No active BGA season.</div>
+      </div>
+    </div>
+
+    <!-- BGA ROUNDS -->
+    <div id="bga-tab-rounds" style="display:none;">
+      <div class="section-title" style="color:var(--green);">📋 Golf Rounds</div>
+      <div id="bga-log-round-section">
+        <div id="bga-log-form" class="log-form" style="display:none;border-color:var(--green);">
+          <div class="card-title" style="margin-bottom:14px;color:var(--green);">Log a Round — EA Sports PGA Tour</div>
+          <div class="form-row">
+            <div>
+              <span class="form-label">Round Name</span>
+              <input type="text" id="bga-round-name" placeholder="e.g. Augusta National Rd 1" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;" />
+            </div>
+            <div>
+              <span class="form-label">Date Played</span>
+              <input type="date" id="bga-round-date" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;" />
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <span class="form-label">Enter stroke scores (lower = better)</span>
+            <div id="bga-stroke-inputs"></div>
+          </div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="logBgaRound()">⛳ Log Round</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleBgaLogForm(false)">Cancel</button>
+          </div>
+        </div>
+        <div id="bga-no-season-log" style="display:none;" class="card">
+          <div style="font-size:12px;color:var(--accent2);">⚠️ No active BGA season — start one in BGA Admin.</div>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:16px;">
+        <button class="btn btn-primary" id="bga-log-btn" style="background:var(--green);border-color:var(--green);" onclick="toggleBgaLogForm(true)">⛳ Log a Round</button>
+      </div>
+      <div id="bga-rounds-list"></div>
+    </div>
+
+    <!-- BGA MASTERS -->
+    <div id="bga-tab-masters" style="display:none;">
+      <div class="section-title" style="color:var(--green);">🌿 BGA Masters</div>
+      <div id="bga-masters-content">
+        <div class="empty-state"><div class="big">🌿</div>End a BGA season to qualify the top 4 for the Masters.</div>
+      </div>
+    </div>
+
+    <!-- BGA HOF -->
+    <div id="bga-tab-hof" style="display:none;">
+      <div class="section-title" style="color:var(--green);">🎖️ BGA Hall of Fame</div>
+      <div id="bga-hof-list"></div>
+    </div>
+
+    <!-- BGA ADMIN -->
+    <div id="bga-tab-admin" style="display:none;">
+      <div class="section-title" style="color:var(--green);">⚙️ BGA Admin</div>
+      <div id="bga-active-season-panel"></div>
+      <div id="bga-start-season-panel" style="display:none;">
+        <div class="card" style="border-color:var(--green);">
+          <div class="card-title" style="color:var(--green);">Start a BGA Season</div>
+          <div style="margin-bottom:10px;">
+            <span class="form-label">Season Name</span>
+            <input type="text" id="bga-new-season-name" placeholder="e.g. BGA Spring 2026" maxlength="40" />
+          </div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn btn-primary" style="background:var(--green);border-color:var(--green);" onclick="startBgaSeason()">⛳ Start BGA Season</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:8px;">
+        <div class="card-title" style="color:var(--green);">FedEx Cup Points System</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.8;">
+          Points are awarded each round based on stroke rank. Lower strokes = higher rank = more points.
+        </div>
+        <table class="bga-points-table">
+          <thead><tr><th>Finish</th><th>Points</th></tr></thead>
+          <tbody>
+            <tr><td>🥇 1st</td><td style="color:var(--green);font-weight:700;">500 pts</td></tr>
+            <tr><td>🥈 2nd</td><td style="color:var(--green);font-weight:700;">300 pts</td></tr>
+            <tr><td>🥉 3rd</td><td>200 pts</td></tr>
+            <tr><td>4th</td><td>150 pts</td></tr>
+            <tr><td>5th</td><td>100 pts</td></tr>
+            <tr><td>6th</td><td>75 pts</td></tr>
+            <tr><td>7th+</td><td>50 pts</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ ADMIN ══ -->
   <div id="page-admin" class="page">
     <div class="section-title">⚙️ Admin</div>
@@ -728,6 +871,9 @@ const EMOJI_LIST = ['🎮','🕹️','👾','🏈','⚽','🏀','🎯','🥊','�
 // ════════════════════════════════
 let DB_URL = '';
 let state = { players:[], games:[], matches:[], activeSeason:null, hof:[], matchLimit:0, tournaments:[] };
+let bgaState = { activeSeason:null, rounds:[], hof:[], masters:[] };
+let bgaActiveTab = 'standings';
+let bgaLogFormOpen = false;
 let tournamentSelectedPlayers = new Set();
 let activeTournamentTab = null; // tournament ID or null for "new" form
 let editingGameId = null;
@@ -857,7 +1003,8 @@ async function initData() {
 
 async function fetchAll() {
   try {
-    const [players, games, matchesRaw, activeSeasonRaw, hofRaw, matchLimitRaw, tournamentsRaw] = await Promise.all([
+    const [players, games, matchesRaw, activeSeasonRaw, hofRaw, matchLimitRaw, tournamentsRaw,
+           bgaSeasonRaw, bgaRoundsRaw, bgaHofRaw, bgaMastersRaw] = await Promise.all([
       dbGet('players'),
       dbGet('games'),
       dbGet('matches'),
@@ -865,6 +1012,10 @@ async function fetchAll() {
       dbGet('hof'),
       dbGet('matchLimit'),
       dbGet('tournaments'),
+      dbGet('bga/activeSeason'),
+      dbGet('bga/rounds'),
+      dbGet('bga/hof'),
+      dbGet('bga/masters'),
     ]);
     state.players = players ? Object.values(players) : [];
     state.games   = games   ? Object.values(games).sort((a,b)=>(a.order??99)-(b.order??99)) : [];
@@ -873,6 +1024,10 @@ async function fetchAll() {
     state.hof = hofRaw ? Object.values(hofRaw).sort((a,b)=> (b.endDate||'').localeCompare(a.endDate||'')) : [];
     state.matchLimit = matchLimitRaw != null ? parseInt(matchLimitRaw) : 0;
     state.tournaments = tournamentsRaw ? Object.values(tournamentsRaw) : [];
+    bgaState.activeSeason = bgaSeasonRaw || null;
+    bgaState.rounds = bgaRoundsRaw ? Object.entries(bgaRoundsRaw).map(([k,v])=>({...v,_key:k})) : [];
+    bgaState.hof = bgaHofRaw ? Object.values(bgaHofRaw).sort((a,b)=>(b.endDate||'').localeCompare(a.endDate||'')) : [];
+    bgaState.masters = bgaMastersRaw ? Object.entries(bgaMastersRaw).map(([k,v])=>({...v,_key:k})) : [];
     render();
     flashSync();
   } catch(e) { console.warn('Fetch error', e); }
@@ -959,6 +1114,8 @@ function render() {
   renderHof();
   renderPlayers();
   renderAdmin();
+  // Only re-render BGA if the BGA page is visible (avoid unnecessary DOM ops)
+  if (document.getElementById('page-bga')?.classList.contains('active')) renderBga();
 }
 
 function renderHeader() {
@@ -1913,14 +2070,490 @@ async function deleteTournament(tournId) {
 }
 
 // ════════════════════════════════
+//  BGA — BORCH GOLF ASSOCIATION
+// ════════════════════════════════
+
+const BGA_POINTS = [500, 300, 200, 150, 100, 75, 50];
+
+function bgaPointsForPlace(place) {
+  // place is 1-indexed
+  return BGA_POINTS[Math.min(place - 1, BGA_POINTS.length - 1)];
+}
+
+function getBgaSeasonRounds() {
+  if (!bgaState.activeSeason) return [];
+  return bgaState.rounds.filter(r => r.seasonId === bgaState.activeSeason.id);
+}
+
+function getBgaStandings() {
+  const rounds = getBgaSeasonRounds();
+  return state.players.map(p => {
+    let pts = 0, roundsPlayed = 0, bestStrokes = Infinity;
+    rounds.forEach(r => {
+      if (r.scores && r.scores[p.id] != null) {
+        roundsPlayed++;
+        const strokes = r.scores[p.id];
+        // Find finish place in this round
+        const sortedScores = Object.values(r.scores).sort((a,b)=>a-b);
+        const place = sortedScores.indexOf(strokes) + 1;
+        pts += bgaPointsForPlace(place);
+        if (strokes < bestStrokes) bestStrokes = strokes;
+      }
+    });
+    return { ...p, pts, roundsPlayed, bestStrokes: bestStrokes === Infinity ? null : bestStrokes };
+  }).filter(p => p.roundsPlayed > 0 || getBgaSeasonRounds().length === 0)
+    .sort((a,b) => b.pts - a.pts || a.roundsPlayed - b.roundsPlayed);
+}
+
+function showBgaTab(tab) {
+  bgaActiveTab = tab;
+  document.querySelectorAll('.bga-tab').forEach((el, i) => {
+    const tabs = ['standings','rounds','masters','hof','admin'];
+    el.classList.toggle('active', tabs[i] === tab);
+  });
+  ['standings','rounds','masters','hof','admin'].forEach(t => {
+    const el = document.getElementById('bga-tab-'+t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+  renderBga();
+}
+
+function renderBga() {
+  renderBgaSeasonBadge();
+  if (bgaActiveTab === 'standings') renderBgaStandings();
+  else if (bgaActiveTab === 'rounds') renderBgaRounds();
+  else if (bgaActiveTab === 'masters') renderBgaMasters();
+  else if (bgaActiveTab === 'hof') renderBgaHof();
+  else if (bgaActiveTab === 'admin') renderBgaAdmin();
+}
+
+function renderBgaSeasonBadge() {
+  const badge = document.getElementById('bga-season-badge');
+  if (!badge) return;
+  if (bgaState.activeSeason) {
+    badge.className = 'bga-badge';
+    badge.innerHTML = '🏌️ ' + escHtml(bgaState.activeSeason.name);
+  } else {
+    badge.className = 'bga-badge';
+    badge.style.borderColor = 'var(--muted)';
+    badge.style.color = 'var(--muted)';
+    badge.innerHTML = '⏸ Off-Season';
+  }
+}
+
+function renderBgaStandings() {
+  const el = document.getElementById('bga-standings-content');
+  if (!el) return;
+  if (!bgaState.activeSeason) {
+    el.innerHTML = '<div class="empty-state"><div class="big">⛳</div>No active BGA season.<br>Head to BGA Admin to start one.</div>';
+    return;
+  }
+  const standings = getBgaStandings();
+  const rounds = getBgaSeasonRounds();
+  if (standings.length === 0 || rounds.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="big">⛳</div>No rounds logged yet.<br>Log the first round to see standings!</div>';
+    return;
+  }
+
+  const top4 = standings.slice(0,4);
+  let html = `<div class="card" style="border-color:rgba(76,175,80,.4);background:linear-gradient(135deg,rgba(76,175,80,.05),var(--card));margin-bottom:16px;">
+    <div class="card-title" style="color:var(--green);">Season Standings</div>
+    <table class="bga-points-table">
+      <thead><tr><th style="width:42px;">Rank</th><th>Player</th><th style="width:70px;">Points</th><th style="width:70px;">Rounds</th></tr></thead>
+      <tbody>
+        ${standings.map((p,i) => {
+          const qualBadge = i < 4 ? '<span class="qualify-badge">🌿 QUALIFIES</span>' : '';
+          return `<tr>
+            <td><span class="rbadge ${['r1','r2','r3','rX','rX'][i]||'rX'}">${i+1}</span></td>
+            <td><strong>${escHtml(p.name)}</strong> ${p.emoji} ${qualBadge}</td>
+            <td><strong style="color:var(--green);">${p.pts}</strong></td>
+            <td>${p.roundsPlayed}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-title" style="color:var(--green);">Season Info</div>
+    <div style="font-size:12px;color:var(--muted);">${rounds.length} round${rounds.length!==1?'s':''} played · ${bgaState.activeSeason.name}</div>
+    ${top4.length >= 4 ? `<div style="font-size:12px;color:var(--green);margin-top:6px;">Top 4 qualify for the <strong>🌿 BGA Masters</strong> when the season ends.</div>` : ''}
+  </div>`;
+  el.innerHTML = html;
+}
+
+function renderBgaRounds() {
+  const noSeason = document.getElementById('bga-no-season-log');
+  const logBtn = document.getElementById('bga-log-btn');
+  if (!bgaState.activeSeason) {
+    if (noSeason) noSeason.style.display = 'block';
+    if (logBtn) logBtn.style.display = 'none';
+    document.getElementById('bga-log-form').style.display = 'none';
+  } else {
+    if (noSeason) noSeason.style.display = 'none';
+    if (logBtn) logBtn.style.display = bgaLogFormOpen ? 'none' : 'inline-flex';
+  }
+
+  // Populate stroke inputs
+  if (bgaLogFormOpen) {
+    const container = document.getElementById('bga-stroke-inputs');
+    if (container && container.children.length === 0) {
+      container.innerHTML = state.players.map(p => `
+        <div class="bga-score-row">
+          <div style="flex:1;font-size:13px;">${p.emoji} <strong>${escHtml(p.name)}</strong></div>
+          <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="1" max="200" placeholder="—" />
+          <div style="font-size:11px;color:var(--muted);width:50px;text-align:right;">strokes</div>
+        </div>`).join('');
+    }
+  }
+
+  // Rounds list
+  const list = document.getElementById('bga-rounds-list');
+  if (!list) return;
+  const rounds = getBgaSeasonRounds().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if (rounds.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="big">⛳</div>No rounds logged yet.</div>';
+    return;
+  }
+  list.innerHTML = rounds.map(r => {
+    const scored = Object.entries(r.scores||{});
+    const sorted = scored.sort(([,a],[,b])=>a-b);
+    return `<div class="bga-round-card">
+      <div class="bga-round-title">⛳ ${escHtml(r.name||'Untitled Round')}
+        <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px;">${formatDate(r.date)}</span>
+        <button class="icon-btn del" style="float:right;" onclick="deleteBgaRound('${r._key}')" title="Delete">✕</button>
+      </div>
+      ${sorted.map(([pid, strokes], i) => {
+        const player = state.players.find(p=>p.id===pid);
+        const pts = bgaPointsForPlace(i+1);
+        const medals = {0:'🥇',1:'🥈',2:'🥉'};
+        return `<div class="bga-score-row">
+          <div class="bga-score-place">${medals[i]||i+1+'.'}</div>
+          <div style="flex:1;">${player?player.emoji:''} <strong>${escHtml(player?.name||pid)}</strong></div>
+          <div class="bga-score-strokes">${strokes}</div>
+          <div style="font-size:11px;color:var(--muted);margin-right:4px;">strokes</div>
+          <div class="bga-score-pts">+${pts} pts</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderBgaMasters() {
+  const el = document.getElementById('bga-masters-content');
+  if (!el) return;
+
+  // Check if there's an active masters
+  const activeMasters = bgaState.masters.find(m => m.status === 'active');
+  const completedMasters = bgaState.masters.filter(m => m.status === 'complete');
+
+  if (!activeMasters && completedMasters.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="big">🌿</div>No BGA Masters yet.<br>End a BGA season to qualify the top 4 and start the Masters.</div>`;
+    return;
+  }
+
+  let html = '';
+
+  if (activeMasters) {
+    const qualifiers = activeMasters.qualifiers || [];
+    const scores = activeMasters.scores || {};
+    const hasScores = Object.keys(scores).length > 0;
+
+    html += `<div class="bga-masters-card">
+      <div class="bga-masters-title">🌿 BGA Masters — ${escHtml(activeMasters.name||'Masters')}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:16px;">EA Sports PGA Tour · 18 holes · Lowest strokes wins</div>
+      <div style="margin-bottom:16px;">
+        <span class="form-label" style="color:var(--green);">Qualified Players</span>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Enter final 18-hole stroke totals. Leave blank if not yet played.</div>
+        ${qualifiers.map(pid => {
+          const player = state.players.find(p=>p.id===pid);
+          return `<div class="bga-score-row">
+            <div style="flex:1;">${player?player.emoji:''} <strong>${escHtml(player?.name||pid)}</strong></div>
+            <input class="stroke-input" type="number" id="masters-strokes-${pid}" min="1" max="200" placeholder="—" value="${scores[pid]!=null?scores[pid]:''}" />
+            <div style="font-size:11px;color:var(--muted);width:50px;text-align:right;">strokes</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-primary" style="background:var(--green);border-color:var(--green);" onclick="saveMastersScores('${activeMasters._key}')">💾 Save Scores</button>
+        <button class="btn btn-gold" onclick="crownMastersChampion('${activeMasters._key}')">🏆 Crown Champion</button>
+      </div>
+      ${hasScores ? renderMastersLeaderboard(qualifiers, scores) : ''}
+    </div>`;
+  }
+
+  completedMasters.forEach(m => {
+    const champion = state.players.find(p=>p.id===m.winnerId);
+    html += `<div class="bga-masters-card" style="opacity:.85;">
+      <div class="bga-masters-title">🌿 ${escHtml(m.name||'Masters')}</div>
+      <div style="margin-bottom:12px;">
+        <span class="winner-banner-crown" style="font-size:36px;">🏆</span>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green);letter-spacing:2px;"> ${champion?champion.emoji+' '+champion.name:'Champion'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">${m.winnerStrokes} strokes · ${formatDate(m.date)}</div>
+      ${renderMastersLeaderboard(m.qualifiers||[], m.scores||{})}
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function renderMastersLeaderboard(qualifiers, scores) {
+  const ranked = qualifiers
+    .filter(pid => scores[pid] != null)
+    .map(pid => ({ pid, strokes: scores[pid] }))
+    .sort((a,b) => a.strokes - b.strokes);
+  if (ranked.length === 0) return '';
+  const medals = {0:'🥇',1:'🥈',2:'🥉'};
+  return `<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+    <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Leaderboard</div>
+    ${ranked.map(({pid,strokes},i) => {
+      const player = state.players.find(p=>p.id===pid);
+      return `<div class="bga-score-row">
+        <div class="bga-score-place">${medals[i]||i+1+'.'}</div>
+        <div style="flex:1;">${player?player.emoji:''} <strong>${escHtml(player?.name||pid)}</strong></div>
+        <div class="bga-score-strokes">${strokes}</div>
+        <div style="font-size:11px;color:var(--muted);">strokes</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderBgaHof() {
+  const el = document.getElementById('bga-hof-list');
+  if (!el) return;
+  if (bgaState.hof.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="big">⛳</div>No BGA champions yet.<br>Complete a BGA season to crown the first winner!</div>';
+    return;
+  }
+  el.innerHTML = bgaState.hof.map((entry, i) => {
+    return `<div class="bga-hof-card">
+      <div style="font-size:36px;flex-shrink:0;">${i===0?'🏆':'🎖️'}</div>
+      <div style="flex:1;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--green);">${escHtml(entry.seasonName||'BGA Season')}</div>
+        <div style="font-weight:700;font-size:15px;margin-top:2px;">${entry.winnerEmoji||'⛳'} ${escHtml(entry.winnerName||'Unknown')}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${formatDate(entry.startDate)} → ${formatDate(entry.endDate)} · Masters Champion</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--green);margin-left:auto;flex-shrink:0;text-align:right;">
+        ${entry.winnerStrokes}<br><span style="font-size:11px;font-family:'Inter',sans-serif;color:var(--muted);">strokes</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderBgaAdmin() {
+  const activePanel = document.getElementById('bga-active-season-panel');
+  const startPanel = document.getElementById('bga-start-season-panel');
+  if (!activePanel || !startPanel) return;
+
+  if (bgaState.activeSeason) {
+    startPanel.style.display = 'none';
+    const rounds = getBgaSeasonRounds();
+    const standings = getBgaStandings();
+    const leader = standings[0];
+    activePanel.innerHTML = `
+      <div class="season-info" style="border-color:var(--green);">
+        <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;"><span class="dot" style="background:var(--green);"></span>Active BGA Season</div>
+        <div class="season-name-display">${escHtml(bgaState.activeSeason.name)}</div>
+        <div class="season-dates">Started ${formatDate(bgaState.activeSeason.startDate)} · ${rounds.length} round${rounds.length!==1?'s':''} played</div>
+        ${leader ? `<div style="margin-top:10px;font-size:12px;color:var(--muted);">Current leader: <strong style="color:var(--green);">${leader.emoji} ${escHtml(leader.name)}</strong> — ${leader.pts} pts</div>` : ''}
+      </div>
+      <div class="card" style="border-color:var(--accent2);">
+        <div class="card-title" style="color:var(--accent2);">End BGA Season</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          This qualifies the top 4 players for the <strong style="color:var(--green);">🌿 BGA Masters</strong>. You'll then log their 18-hole strokes to crown the champion.
+        </div>
+        <button class="btn btn-gold" onclick="endBgaSeason()">🌿 End Season &amp; Start Masters</button>
+      </div>`;
+  } else {
+    activePanel.innerHTML = `
+      <div class="card" style="border-color:var(--accent2);margin-bottom:16px;text-align:center;padding:20px;">
+        <div style="font-size:32px;margin-bottom:8px;">⏸</div>
+        <div style="font-weight:700;margin-bottom:4px;">No Active BGA Season</div>
+        <div style="font-size:12px;color:var(--muted);">Start a new season below to begin tracking rounds.</div>
+      </div>`;
+    startPanel.style.display = 'block';
+  }
+}
+
+function toggleBgaLogForm(open) {
+  bgaLogFormOpen = open;
+  const form = document.getElementById('bga-log-form');
+  const btn = document.getElementById('bga-log-btn');
+  if (form) form.style.display = open ? 'block' : 'none';
+  if (btn) btn.style.display = open ? 'none' : 'inline-flex';
+  if (open) {
+    const dateEl = document.getElementById('bga-round-date');
+    if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    // Rebuild stroke inputs fresh
+    const container = document.getElementById('bga-stroke-inputs');
+    if (container) container.innerHTML = state.players.map(p => `
+      <div class="bga-score-row">
+        <div style="flex:1;font-size:13px;">${p.emoji} <strong>${escHtml(p.name)}</strong></div>
+        <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="1" max="200" placeholder="—" />
+        <div style="font-size:11px;color:var(--muted);width:50px;text-align:right;">strokes</div>
+      </div>`).join('');
+  }
+}
+
+async function logBgaRound() {
+  if (!bgaState.activeSeason) { showToast('No active BGA season!'); return; }
+  const name = document.getElementById('bga-round-name').value.trim();
+  const date = document.getElementById('bga-round-date').value;
+
+  // Collect scores — only include players with valid numbers
+  const scores = {};
+  state.players.forEach(p => {
+    const val = document.getElementById('bga-strokes-'+p.id)?.value;
+    if (val && !isNaN(parseInt(val)) && parseInt(val) > 0) {
+      scores[p.id] = parseInt(val);
+    }
+  });
+
+  if (Object.keys(scores).length < 2) { showToast('Enter strokes for at least 2 players!'); return; }
+
+  const round = {
+    seasonId: bgaState.activeSeason.id,
+    name: name || 'Round ' + (getBgaSeasonRounds().length + 1),
+    date: date || new Date().toISOString().slice(0,10),
+    scores,
+    loggedAt: Date.now(),
+  };
+
+  await dbPush('bga/rounds', round);
+  document.getElementById('bga-round-name').value = '';
+  toggleBgaLogForm(false);
+  await fetchAll();
+  showToast('⛳ Round logged!');
+}
+
+async function deleteBgaRound(key) {
+  if (!confirm('Delete this round? Points will be recalculated.')) return;
+  await dbDelete(`bga/rounds/${key}`);
+  await fetchAll();
+  showToast('Round deleted.');
+}
+
+async function startBgaSeason() {
+  const name = document.getElementById('bga-new-season-name').value.trim();
+  if (!name) { showToast('Enter a season name!'); return; }
+  const id = 'bgaseason_' + Date.now();
+  const season = { id, name, startDate: new Date().toISOString().slice(0,10), active: true };
+  await dbSet('bga/activeSeason', season);
+  document.getElementById('bga-new-season-name').value = '';
+  await fetchAll();
+  showToast('⛳ ' + name + ' has begun!');
+}
+
+async function endBgaSeason() {
+  if (!bgaState.activeSeason) return;
+  const standings = getBgaStandings();
+  if (standings.length < 2) { showToast('Need at least 2 players with rounds!'); return; }
+
+  const top4 = standings.slice(0, 4);
+  const names = top4.map(p=>p.emoji+' '+p.name).join(', ');
+  if (!confirm(`End "${bgaState.activeSeason.name}"?\n\nTop 4 qualifying for the Masters:\n${names}`)) return;
+
+  // Archive season
+  const archived = {
+    ...bgaState.activeSeason,
+    endDate: new Date().toISOString().slice(0,10),
+    finalStandings: standings.map(p => ({ id:p.id, name:p.name, emoji:p.emoji, pts:p.pts, roundsPlayed:p.roundsPlayed })),
+  };
+  await dbSet(`bga/archivedSeasons/${bgaState.activeSeason.id}`, archived);
+
+  // Create masters entry
+  const mastersId = 'masters_' + Date.now();
+  const masters = {
+    id: mastersId,
+    name: bgaState.activeSeason.name + ' — Masters',
+    seasonId: bgaState.activeSeason.id,
+    seasonName: bgaState.activeSeason.name,
+    qualifiers: top4.map(p=>p.id),
+    scores: {},
+    status: 'active',
+    date: new Date().toISOString().slice(0,10),
+    createdAt: Date.now(),
+  };
+  await dbSet(`bga/masters/${mastersId}`, masters);
+
+  // Clear active season
+  await dbDelete('bga/activeSeason');
+
+  await fetchAll();
+  showToast('🌿 Masters created! Head to BGA Masters to log scores.');
+  showBgaTab('masters');
+}
+
+async function saveMastersScores(mastersKey) {
+  const masters = bgaState.masters.find(m=>m._key===mastersKey);
+  if (!masters) return;
+  const scores = {};
+  (masters.qualifiers||[]).forEach(pid => {
+    const val = document.getElementById('masters-strokes-'+pid)?.value;
+    if (val && !isNaN(parseInt(val)) && parseInt(val) > 0) {
+      scores[pid] = parseInt(val);
+    }
+  });
+  await dbPatch(`bga/masters/${mastersKey}`, { scores });
+  await fetchAll();
+  showToast('💾 Scores saved!');
+}
+
+async function crownMastersChampion(mastersKey) {
+  const masters = bgaState.masters.find(m=>m._key===mastersKey);
+  if (!masters) return;
+  // Collect current scores from inputs first
+  const scores = { ...(masters.scores||{}) };
+  (masters.qualifiers||[]).forEach(pid => {
+    const val = document.getElementById('masters-strokes-'+pid)?.value;
+    if (val && !isNaN(parseInt(val)) && parseInt(val) > 0) {
+      scores[pid] = parseInt(val);
+    }
+  });
+
+  const ranked = (masters.qualifiers||[])
+    .filter(pid => scores[pid] != null)
+    .map(pid => ({ pid, strokes: scores[pid] }))
+    .sort((a,b)=>a.strokes-b.strokes);
+
+  if (ranked.length < 2) { showToast('Enter strokes for at least 2 players!'); return; }
+
+  const winner = ranked[0];
+  const winnerPlayer = state.players.find(p=>p.id===winner.pid);
+
+  if (!confirm(`Crown ${winnerPlayer?.emoji} ${winnerPlayer?.name} as BGA Masters Champion with ${winner.strokes} strokes?`)) return;
+
+  // Save HOF entry
+  const hofEntry = {
+    id: masters.id,
+    seasonName: masters.seasonName||masters.name,
+    startDate: masters.date,
+    endDate: new Date().toISOString().slice(0,10),
+    winnerId: winner.pid,
+    winnerName: winnerPlayer?.name||'Unknown',
+    winnerEmoji: winnerPlayer?.emoji||'⛳',
+    winnerStrokes: winner.strokes,
+    qualifiers: masters.qualifiers,
+  };
+  await dbSet(`bga/hof/${masters.id}`, hofEntry);
+
+  // Mark masters as complete
+  await dbPatch(`bga/masters/${mastersKey}`, { scores, status:'complete', winnerId:winner.pid, winnerStrokes:winner.strokes });
+
+  await fetchAll();
+  showToast(`🏆 ${winnerPlayer?.name} wins the BGA Masters!`);
+}
+
+// ════════════════════════════════
 //  UI HELPERS
 // ════════════════════════════════
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  const order=['standings','matches','tournament','games','hof','players','admin'];
+  const order=['standings','matches','tournament','games','hof','players','bga','admin'];
   document.querySelectorAll('.tab')[order.indexOf(name)]?.classList.add('active');
+  if (name === 'bga') renderBga();
 }
 
 function showToast(msg) {
