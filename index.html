@@ -1341,17 +1341,49 @@ function getSeasonStandings() {
 // ════════════════════════════════
 //  RENDER
 // ════════════════════════════════
+// ── Form-open guards: never wipe a form the user is mid-filling ──
+function isUserTyping() {
+  const active = document.activeElement;
+  if (!active) return false;
+  const tag = active.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
 function render() {
   renderHeader();
   renderStandings();
-  renderMatches();
+
+  // Never re-render matches while the log form is open OR user is typing inside it
+  if (!logFormOpen) {
+    renderMatches();
+  } else {
+    // Still refresh just the matches list below the form, not the form itself
+    renderMatchesList();
+    renderPlayerChips();      // chips are state-driven, safe to refresh
+    updatePlaceSelects();     // position dropdowns are state-driven too
+  }
+
   renderGames();
-  renderTournament();
+
+  // Never blow away the tournament form while it's being filled
+  if (activeTournamentTab !== null || !isUserTyping()) {
+    renderTournament();
+  }
+
   renderHof();
   renderPlayers();
   renderAdmin();
-  // Only re-render BGA if the BGA page is visible (avoid unnecessary DOM ops)
-  if (document.getElementById('page-bga')?.classList.contains('active')) renderBga();
+
+  // BGA: skip any tab that has an open form mid-fill
+  if (document.getElementById('page-bga')?.classList.contains('active')) {
+    if (!bgaLogFormOpen) {
+      renderBga();
+    } else {
+      // Refresh everything except the log form's input area
+      renderBgaSeasonBadge();
+      renderBgaRoundsList();
+    }
+  }
 }
 
 function renderHeader() {
@@ -1411,23 +1443,22 @@ function renderStandings() {
 }
 
 function renderMatches() {
-  // update game dropdown
-  const sel = document.getElementById('lm-game');
-  const prev = sel.value;
-  sel.innerHTML = '<option value="">— Select game —</option>' +
-    state.games.map(g => {
-      const mult = g.multiplier || 1;
-      const tag = mult > 1 ? ` (${mult}×)` : '';
-      return `<option value="${g.id}" ${g.id===prev?'selected':''}>${g.emoji} ${escHtml(g.name)}${tag}</option>`;
-    }).join('');
+  // ── Form controls (only touch when form is CLOSED) ──
+  if (!logFormOpen) {
+    // update game dropdown, preserving existing selection
+    const sel = document.getElementById('lm-game');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Select game —</option>' +
+      state.games.map(g => {
+        const mult = g.multiplier || 1;
+        const tag = mult > 1 ? ` (${mult}×)` : '';
+        return `<option value="${g.id}" ${g.id===prev?'selected':''}>${g.emoji} ${escHtml(g.name)}${tag}</option>`;
+      }).join('');
 
-  // set today's date if empty
-  const dateEl = document.getElementById('lm-date');
-  if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
-
-  // update chips and place selects
-  renderPlayerChips();
-  updatePlaceSelects();
+    // set today's date only if empty (never overwrite user input)
+    const dateEl = document.getElementById('lm-date');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+  }
 
   // show/hide log form controls based on active season
   const noSeasonLog = document.getElementById('no-season-log');
@@ -1435,13 +1466,17 @@ function renderMatches() {
   if (!state.activeSeason) {
     noSeasonLog.style.display = 'block';
     logMatchBtn.style.display = 'none';
-    document.getElementById('log-match-form').style.display = 'none';
+    if (!logFormOpen) document.getElementById('log-match-form').style.display = 'none';
   } else {
     noSeasonLog.style.display = 'none';
-    logMatchBtn.style.display = 'inline-flex';
+    if (!logFormOpen) logMatchBtn.style.display = 'inline-flex';
   }
 
-  // matches list — show current season first, then all
+  // ── Matches list (always safe to refresh — read-only display) ──
+  renderMatchesList();
+}
+
+function renderMatchesList() {
   const seasonMatches = getSeasonMatches();
   const allOther = state.matches.filter(m => !state.activeSeason || m.seasonId !== state.activeSeason.id);
   const allSorted = [...seasonMatches, ...allOther].sort((a,b) => (b.date||'').localeCompare(a.date||''));
@@ -1458,7 +1493,7 @@ function renderMatches() {
   if (state.matchLimit > 0) {
     const playerCounts = {};
     for (const m of seasonMatchesSorted) {
-      if (m.isFinals) continue; // finals are never over-limit
+      if (m.isFinals) continue;
       let thisMatchOver = false;
       for (const pid of Object.keys(m.results||{})) {
         if ((playerCounts[pid]||0) >= state.matchLimit) { thisMatchOver = true; break; }
@@ -1643,10 +1678,13 @@ function renderPlayers() {
 }
 
 function renderAdmin() {
+  // Only update inputs when the user is NOT actively typing in them
+  const active = document.activeElement;
+
   // Sync limit input
   const limitInput = document.getElementById('match-limit-input');
   const limitDisplay = document.getElementById('match-limit-display');
-  if (limitInput && document.activeElement !== limitInput) {
+  if (limitInput && active !== limitInput) {
     limitInput.value = state.matchLimit || '';
   }
   if (limitDisplay) {
@@ -1657,6 +1695,11 @@ function renderAdmin() {
 
   const activePanel = document.getElementById('active-season-panel');
   const startPanel = document.getElementById('start-season-panel');
+
+  // Protect season name input from being wiped while user is typing
+  const seasonNameInput = document.getElementById('new-season-name');
+  const bgaSeasonNameInput = document.getElementById('bga-new-season-name');
+  const typingInSeasonName = active === seasonNameInput || active === bgaSeasonNameInput;
 
   if (state.activeSeason) {
     startPanel.style.display = 'none';
@@ -1678,12 +1721,15 @@ function renderAdmin() {
         <button class="btn btn-gold" onclick="endSeason()">🏆 End Season &amp; Crown Champion</button>
       </div>`;
   } else {
-    activePanel.innerHTML = `
-      <div class="card" style="border-color:var(--accent2);margin-bottom:16px;text-align:center;padding:20px;">
-        <div style="font-size:32px;margin-bottom:8px;">⏸</div>
-        <div style="font-weight:700;margin-bottom:4px;">No Active Season</div>
-        <div style="font-size:12px;color:var(--muted);">Start a new season below to begin tracking.</div>
-      </div>`;
+    // Only rebuild the "no season" card if the user isn't mid-typing a season name
+    if (!typingInSeasonName) {
+      activePanel.innerHTML = `
+        <div class="card" style="border-color:var(--accent2);margin-bottom:16px;text-align:center;padding:20px;">
+          <div style="font-size:32px;margin-bottom:8px;">⏸</div>
+          <div style="font-weight:700;margin-bottom:4px;">No Active Season</div>
+          <div style="font-size:12px;color:var(--muted);">Start a new season below to begin tracking.</div>
+        </div>`;
+    }
     startPanel.style.display = 'block';
   }
 }
@@ -1927,10 +1973,42 @@ function renderTournament() {
     activeTournamentTab = seasonTournaments[0]?.id || null;
   }
 
+  // ── FORM PROTECTION: if the "New Tournament" form is visible and the user
+  //    has started filling it (selected players or picked a game), don't
+  //    rebuild the whole container — just refresh the tab bar in place ──
+  const newFormVisible = activeTournamentTab === null || seasonTournaments.length === 0;
+  const formHasInput = tournamentSelectedPlayers.size > 0 ||
+    (document.getElementById('tourn-game') && document.getElementById('tourn-game').value !== '');
+
+  if (newFormVisible && formHasInput) {
+    // Only refresh the tab bar (above the form) — leave the form DOM untouched
+    let tabHtml = '';
+    if (seasonTournaments.length > 0) {
+      tabHtml += '<div class="tourn-tabs">';
+      seasonTournaments.forEach(t => {
+        const isComplete = t.status === 'complete';
+        const isActive = activeTournamentTab === t.id;
+        tabHtml += `<div class="tourn-tab${isActive?' active':''}${isComplete?' complete':''}" onclick="selectTournTab('${t.id}')">
+          ${t.gameEmoji} ${escHtml(t.gameName)}${isComplete?' 🏆':''}
+        </div>`;
+      });
+      tabHtml += `<div class="tourn-tab new-tab${activeTournamentTab===null?' active':''}" onclick="selectTournTab(null)">＋ New</div>`;
+      tabHtml += '</div>';
+    }
+    // Update or insert the tab bar without touching the form
+    const existingTabBar = container.querySelector('.tourn-tabs');
+    if (tabHtml && existingTabBar) {
+      existingTabBar.outerHTML = tabHtml;
+    } else if (tabHtml && !existingTabBar) {
+      container.insertAdjacentHTML('afterbegin', tabHtml);
+    }
+    return; // ← leave the form completely alone
+  }
+
+  // Normal full rebuild
   let html = '';
 
   if (seasonTournaments.length > 0) {
-    // Build sub-tab bar
     html += '<div class="tourn-tabs">';
     seasonTournaments.forEach(t => {
       const isComplete = t.status === 'complete';
@@ -1939,12 +2017,10 @@ function renderTournament() {
         ${t.gameEmoji} ${escHtml(t.gameName)}${isComplete?' 🏆':''}
       </div>`;
     });
-    // New tournament tab
     html += `<div class="tourn-tab new-tab${activeTournamentTab===null?' active':''}" onclick="selectTournTab(null)">＋ New</div>`;
     html += '</div>';
   }
 
-  // Content area
   if (activeTournamentTab === null || seasonTournaments.length === 0) {
     html += renderNewTournamentForm();
     const completed = seasonTournaments.filter(t => t.status === 'complete');
@@ -1960,7 +2036,7 @@ function renderTournament() {
 
   container.innerHTML = html;
 
-  // Re-apply chip selection for new tournament form
+  // Re-apply chip selection after rebuild
   tournamentSelectedPlayers.forEach(id => {
     const chip = document.getElementById('tc-'+id);
     if (chip) { chip.classList.add('selected'); chip.querySelector('.chip-check').textContent = '✓'; }
@@ -2489,16 +2565,18 @@ function renderBgaStandings() {
 function renderBgaRounds() {
   const noSeason = document.getElementById('bga-no-season-log');
   const logBtn = document.getElementById('bga-log-btn');
+
+  // ── Form visibility controls (safe — only show/hide, never wipe inputs) ──
   if (!bgaState.activeSeason) {
     if (noSeason) noSeason.style.display = 'block';
     if (logBtn) logBtn.style.display = 'none';
-    document.getElementById('bga-log-form').style.display = 'none';
+    if (!bgaLogFormOpen) document.getElementById('bga-log-form').style.display = 'none';
   } else {
     if (noSeason) noSeason.style.display = 'none';
     if (logBtn) logBtn.style.display = bgaLogFormOpen ? 'none' : 'inline-flex';
   }
 
-  // Populate stroke inputs
+  // Populate stroke input rows only once when form first opens (never overwrite typed values)
   if (bgaLogFormOpen) {
     const container = document.getElementById('bga-stroke-inputs');
     if (container && container.children.length === 0) {
@@ -2506,12 +2584,17 @@ function renderBgaRounds() {
         <div class="bga-score-row">
           <div style="flex:1;font-size:13px;">${p.emoji} <strong>${escHtml(p.name)}</strong></div>
           <input class="stroke-input" type="number" id="bga-strokes-${p.id}" min="1" max="200" placeholder="—" />
-          <div style="font-size:11px;color:var(--muted);width:50px;text-align:right;">strokes</div>
+          <div style="font-size:11px;color:rgba(200,168,75,.5);width:50px;text-align:right;">strokes</div>
         </div>`).join('');
     }
+    // Don't touch the list while form is open — just return
+    return;
   }
 
-  // Rounds list
+  renderBgaRoundsList();
+}
+
+function renderBgaRoundsList() {
   const list = document.getElementById('bga-rounds-list');
   if (!list) return;
   const rounds = getBgaSeasonRounds().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
@@ -2522,7 +2605,6 @@ function renderBgaRounds() {
   list.innerHTML = rounds.map(r => {
     const scored = Object.entries(r.scores||{});
     const sorted = scored.sort(([,a],[,b])=>a-b);
-    const posCls = ['p1','p2','p3'];
     return `<div class="bga-scorecard">
       <div class="bga-scorecard-header">
         <div>
