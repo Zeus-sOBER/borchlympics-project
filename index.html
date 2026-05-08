@@ -597,6 +597,73 @@
     .mult-badge { font-size:9px; padding:2px 5px; }
     .adv-badge, .elim-badge, .over-limit-badge { font-size:9px; }
     .limit-bar-wrap { height:5px; margin-top:6px; }
+
+    /* ── BGA MOBILE ── */
+    /* Header — tighten up the oversized desktop logo */
+    .bga-header { padding:16px 14px 14px; border-radius:10px; }
+    .bga-logo { font-size:clamp(32px,12vw,52px); letter-spacing:4px; }
+    .bga-logo-full { font-size:9px; letter-spacing:2px; }
+    .bga-sub { font-size:8px; letter-spacing:2px; }
+    .bga-badge { font-size:9px; padding:3px 10px; }
+
+    /* BGA nav — same scrollable trick as main tabs */
+    .bga-tabs {
+      -webkit-overflow-scrolling:touch;
+      overflow-x:auto;
+      overflow-y:hidden;
+      flex-wrap:nowrap;
+      border-radius:6px;
+    }
+    .bga-tab {
+      flex:0 0 auto;
+      padding:10px 12px;
+      min-height:40px;
+      font-size:10px;
+      letter-spacing:.5px;
+    }
+
+    /* Leaderboard rows — hide rounds column to save space */
+    .bga-lb-rounds { display:none; }
+    .bga-lb-pos { width:26px; font-size:16px; }
+    .bga-lb-name { font-size:13px; }
+    .bga-lb-pts { font-size:18px; width:50px; }
+    .qualify-badge { font-size:8px; padding:1px 5px; }
+    .bga-lb-header { padding:8px 12px; }
+    .bga-lb-title { font-size:14px; }
+    .bga-lb-row { padding:9px 12px; }
+    .bga-qualify-cut { padding:5px 12px; font-size:9px; }
+
+    /* Scorecard rows — stack strokes below name on tiny screens */
+    .bga-scorecard-header { padding:8px 12px; flex-wrap:wrap; gap:6px; }
+    .bga-scorecard-title { font-size:14px; }
+    .bga-scorecard-row { padding:8px 12px; gap:8px; }
+    .bga-sc-name { font-size:12px; }
+    .bga-sc-strokes { font-size:18px; width:34px; }
+    .bga-sc-pts { font-size:10px; min-width:44px; }
+
+    /* Masters card */
+    .bga-masters-card { padding:14px 12px; }
+    .bga-masters-title { font-size:22px; letter-spacing:2px; }
+    .bga-masters-subtitle { letter-spacing:1.5px; }
+
+    /* HOF card */
+    .bga-hof-card { padding:12px; gap:10px; flex-wrap:wrap; }
+
+    /* Schedule */
+    .bga-schedule-header { padding:8px 12px; flex-wrap:wrap; gap:8px; }
+    .bga-schedule-item { padding:10px 12px; gap:8px; flex-wrap:nowrap; }
+    .bga-sched-name { font-size:12px; }
+    .bga-sched-loc { font-size:10px; }
+    .bga-sched-type { font-size:9px; padding:2px 6px; white-space:nowrap; }
+    .bga-sched-num { font-size:16px; width:22px; }
+
+    /* Score log form */
+    .bga-score-row { gap:8px; padding:8px 0; }
+    .stroke-input { width:70px; font-size:18px; padding:8px 6px; }
+
+    /* Inputs in BGA forms */
+    #bga-round-count, #bga-course-filter, #bga-round-name, #bga-round-date,
+    #bga-new-season-name { font-size:16px; min-height:44px; }
   }
 
   /* ── EXTRA TINY (iPhone SE etc) ── */
