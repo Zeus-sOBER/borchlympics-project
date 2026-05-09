@@ -1405,10 +1405,8 @@ function render() {
   if (!logFormOpen) {
     renderMatches();
   } else {
-    // Still refresh just the matches list below the form, not the form itself
+    // Only refresh the matches list below the form — never touch chips or dropdowns mid-fill
     renderMatchesList();
-    renderPlayerChips();      // chips are state-driven, safe to refresh
-    updatePlaceSelects();     // position dropdowns are state-driven too
   }
 
   renderGames();
@@ -1627,6 +1625,23 @@ function updatePlaceSelects() {
   const labels = {'':'—'};
   positions.slice(1).forEach(p => { labels[p] = (medals[parseInt(p)] || p+'th') + ' place'; });
 
+  // Check if the set of players matches what's already rendered — if so, just restore values
+  const existingIds = Array.from(container.querySelectorAll('.place-select')).map(s => s.id.replace('lm-pos-',''));
+  const newIds = activePlayers.map(p => p.id);
+  const sameSet = existingIds.length === newIds.length && newIds.every(id => existingIds.includes(id));
+
+  if (sameSet) {
+    // Players haven't changed — don't touch the DOM, selections are preserved
+    return;
+  }
+
+  // Save any existing selections before rebuilding
+  const saved = {};
+  activePlayers.forEach(p => {
+    const el = document.getElementById('lm-pos-' + p.id);
+    if (el) saved[p.id] = el.value;
+  });
+
   container.innerHTML = activePlayers.map(p =>
     `<div class="place-row">
       <div class="place-label">${p.emoji} ${escHtml(p.name)}</div>
@@ -1634,6 +1649,14 @@ function updatePlaceSelects() {
         ${positions.map(pos => `<option value="${pos}">${labels[pos]||pos}</option>`).join('')}
       </select>
     </div>`).join('');
+
+  // Restore saved selections
+  activePlayers.forEach(p => {
+    if (saved[p.id]) {
+      const el = document.getElementById('lm-pos-' + p.id);
+      if (el) el.value = saved[p.id];
+    }
+  });
 }
 
 function renderGames() {
