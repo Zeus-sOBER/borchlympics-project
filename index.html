@@ -449,6 +449,25 @@
   .btn-pga-gold { background:rgba(200,168,75,.15); color:var(--flag); border:1px solid var(--flag); font-weight:700; }
   .btn-pga-gold:hover { background:rgba(200,168,75,.25); }
 
+  /* Lobby selector */
+  .bga-lobby-btn { cursor:pointer; }
+  .bga-lobby-btn span {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:44px; height:44px; border-radius:8px; font-family:'Bebas Neue',sans-serif;
+    font-size:20px; letter-spacing:2px; border:1px solid #2a5c30;
+    background:#0c1f0e; color:#6a8c6e; transition:all .15s; user-select:none;
+  }
+  .bga-lobby-btn input:checked + span {
+    background:var(--leaderboard-bg); color:var(--flag); border-color:var(--flag);
+  }
+
+  /* Next Up banner */
+  .bga-next-up-banner {
+    background:linear-gradient(135deg,#003d35,#00473e);
+    border:1px solid rgba(200,168,75,.3); border-left:4px solid var(--flag);
+    border-radius:8px; padding:12px 16px; margin-bottom:14px;
+  }
+
   /* ── TAB LABEL VISIBILITY ── */
   /* Desktop: show full emoji + label */
   .tab-icon { display:inline; }
@@ -664,6 +683,11 @@
     /* Inputs in BGA forms */
     #bga-round-count, #bga-course-filter, #bga-round-name, #bga-round-date,
     #bga-new-season-name { font-size:16px; min-height:44px; }
+    .bga-lobby-btn span { width:52px; height:52px; font-size:22px; }
+    .bga-next-up-banner { padding:10px 12px; }
+    .bga-date-input { width:100% !important; font-size:14px !important; min-height:36px; }
+    .bga-schedule-item { flex-wrap:wrap; }
+    .bga-schedule-item > div:last-child { width:100%; margin-top:6px; }
   }
 
   /* ── EXTRA TINY (iPhone SE etc) ── */
@@ -926,10 +950,10 @@
       <div class="section-title" style="color:var(--flag);font-size:22px;">📋 Round Results</div>
       <div id="bga-log-round-section">
         <div id="bga-log-form" class="log-form" style="display:none;background:#0c1f0e;border-color:rgba(200,168,75,.4);border-style:solid;">
-          <div class="card-title" style="margin-bottom:14px;color:var(--flag);letter-spacing:2px;">LOG A ROUND — EA SPORTS PGA TOUR</div>
+          <div class="card-title" style="margin-bottom:14px;color:var(--flag);letter-spacing:2px;">LOG A LOBBY — EA SPORTS PGA TOUR</div>
           <div class="form-row">
             <div>
-              <span class="form-label">Course / Round</span>
+              <span class="form-label">Course / Leg</span>
               <select id="bga-round-name" style="width:100%;background:#0c1f0e;border:1px solid #2a5c30;color:#e8f5e9;border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit;min-height:44px;">
                 <option value="">— Select course —</option>
               </select>
@@ -943,11 +967,20 @@
             </div>
           </div>
           <div style="margin-bottom:14px;">
+            <span class="form-label">Lobby</span>
+            <div style="display:flex;gap:8px;">
+              <label class="bga-lobby-btn"><input type="radio" name="bga-lobby" id="bga-lobby-select" value="A" checked hidden/><span>A</span></label>
+              <label class="bga-lobby-btn"><input type="radio" name="bga-lobby" value="B" hidden/><span>B</span></label>
+              <label class="bga-lobby-btn"><input type="radio" name="bga-lobby" value="C" hidden/><span>C</span></label>
+            </div>
+            <div style="font-size:10px;color:rgba(200,168,75,.4);margin-top:4px;">Log each lobby separately — finalize the leg once all lobbies are in.</div>
+          </div>
+          <div style="margin-bottom:14px;">
             <span class="form-label">Enter stroke scores (lower = better)</span>
             <div id="bga-stroke-inputs"></div>
           </div>
           <div class="btn-row" style="margin-top:0;">
-            <button class="btn btn-pga-gold btn-sm" onclick="logBgaRound()">⛳ Log Round</button>
+            <button class="btn btn-pga-gold btn-sm" onclick="logBgaRound()">⛳ Log Lobby</button>
             <button class="btn btn-secondary btn-sm" onclick="toggleBgaLogForm(false)">Cancel</button>
           </div>
         </div>
@@ -1113,10 +1146,11 @@ const EMOJI_LIST = ['🎮','🕹️','👾','🏈','⚽','🏀','🎯','🥊','�
 // ════════════════════════════════
 let DB_URL = '';
 let state = { players:[], games:[], matches:[], activeSeason:null, hof:[], matchLimit:0, tournaments:[] };
-let bgaState = { activeSeason:null, rounds:[], hof:[], masters:[] };
+let bgaState = { activeSeason:null, rounds:[], hof:[], masters:[], legs:[] };
 let bgaActiveTab = 'standings';
 let bgaLogFormOpen = false;
 let bgaSchedule = []; // persisted schedule: [{name, loc, flag, isMasters}, ...]
+let bgaScheduleDates = {}; // {courseName: 'YYYY-MM-DD'}
 let tournamentSelectedPlayers = new Set();
 let activeTournamentTab = null; // tournament ID or null for "new" form
 let editingGameId = null;
@@ -1184,13 +1218,12 @@ function launchApp(url) {
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('cur-db-url').textContent = url;
   buildEmojiPicker();
-  // Restore saved schedule from localStorage
+  // Restore saved schedule and dates from localStorage
   try {
     const saved = localStorage.getItem('bga_schedule');
-    if (saved) {
-      bgaSchedule = JSON.parse(saved);
-      window._bgaLastSchedule = bgaSchedule;
-    }
+    if (saved) { bgaSchedule = JSON.parse(saved); window._bgaLastSchedule = bgaSchedule; }
+    const savedDates = localStorage.getItem('bga_schedule_dates');
+    if (savedDates) { bgaScheduleDates = JSON.parse(savedDates); }
   } catch(e) {}
   initData().then(() => startPolling());
 }
@@ -1253,7 +1286,7 @@ async function initData() {
 async function fetchAll() {
   try {
     const [players, games, matchesRaw, activeSeasonRaw, hofRaw, matchLimitRaw, tournamentsRaw,
-           bgaSeasonRaw, bgaRoundsRaw, bgaHofRaw, bgaMastersRaw] = await Promise.all([
+           bgaSeasonRaw, bgaRoundsRaw, bgaHofRaw, bgaMastersRaw, bgaLegsRaw] = await Promise.all([
       dbGet('players'),
       dbGet('games'),
       dbGet('matches'),
@@ -1265,6 +1298,7 @@ async function fetchAll() {
       dbGet('bga/rounds'),
       dbGet('bga/hof'),
       dbGet('bga/masters'),
+      dbGet('bga/legs'),
     ]);
     state.players = players ? Object.values(players) : [];
     state.games   = games   ? Object.values(games).sort((a,b)=>(a.order??99)-(b.order??99)) : [];
@@ -1277,6 +1311,7 @@ async function fetchAll() {
     bgaState.rounds = bgaRoundsRaw ? Object.entries(bgaRoundsRaw).map(([k,v])=>({...v,_key:k})) : [];
     bgaState.hof = bgaHofRaw ? Object.values(bgaHofRaw).sort((a,b)=>(b.endDate||'').localeCompare(a.endDate||'')) : [];
     bgaState.masters = bgaMastersRaw ? Object.entries(bgaMastersRaw).map(([k,v])=>({...v,_key:k})) : [];
+    bgaState.legs = bgaLegsRaw ? Object.entries(bgaLegsRaw).map(([k,v])=>({...v,_key:k})) : [];
     render();
     flashSync();
   } catch(e) { console.warn('Fetch error', e); }
@@ -2398,35 +2433,101 @@ async function deleteTournament(tournId) {
 //  BGA — BORCH GOLF ASSOCIATION
 // ════════════════════════════════
 
-const BGA_POINTS = [500, 300, 200, 150, 100, 75, 50];
+// Points for up to 12 players (3 lobbies × 4) — steep drop from 1st, then tails off
+const BGA_POINTS = [1000, 750, 500, 350, 200, 100, 50, 25, 10, 10, 10, 10];
 
 function bgaPointsForPlace(place) {
-  // place is 1-indexed
   return BGA_POINTS[Math.min(place - 1, BGA_POINTS.length - 1)];
 }
 
+// ── Multi-lobby helpers ──
+// A "leg" in Firebase: bga/legs/{legKey} = { seasonId, course, date, status:'open'|'final', lobbies:{A:{},B:{},C:{}}, finalScores:{}, finalPoints:{} }
+// Legacy single-round entries in bga/rounds are still displayed but treated as finalized single-lobby
+
+function getBgaSeasonLegs() {
+  if (!bgaState.activeSeason) return [];
+  return (bgaState.legs || []).filter(l => l.seasonId === bgaState.activeSeason.id);
+}
+
+function getMergedFieldScores(leg) {
+  // Merge all lobby scores into one flat {playerId: strokes} map
+  const merged = {};
+  const lobbies = leg.lobbies || {};
+  Object.values(lobbies).forEach(lobbyScores => {
+    Object.entries(lobbyScores || {}).forEach(([pid, strokes]) => {
+      merged[pid] = strokes;
+    });
+  });
+  return merged;
+}
+
+function calcLegPoints(leg) {
+  // Returns {playerId: points} ranked across the full field
+  const scores = leg.finalScores || getMergedFieldScores(leg);
+  const ranked = Object.entries(scores)
+    .filter(([,s]) => s != null && !isNaN(s))
+    .sort(([,a],[,b]) => a - b); // lowest strokes = best
+  const pts = {};
+  ranked.forEach(([pid], i) => { pts[pid] = bgaPointsForPlace(i + 1); });
+  return pts;
+}
+
 function getBgaSeasonRounds() {
+  // Legacy: old single-lobby rounds
   if (!bgaState.activeSeason) return [];
   return bgaState.rounds.filter(r => r.seasonId === bgaState.activeSeason.id);
 }
 
 function getBgaStandings() {
-  const rounds = getBgaSeasonRounds();
+  const legs = getBgaSeasonLegs();
+  const legacyRounds = getBgaSeasonRounds();
+
+  // Find last round winner for hot streak badge
+  const allFinalized = legs.filter(l => l.status === 'final')
+    .sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  let lastWinnerId = null;
+  if (allFinalized.length > 0) {
+    const lastLeg = allFinalized[0];
+    const scores = lastLeg.finalScores || getMergedFieldScores(lastLeg);
+    const ranked = Object.entries(scores).filter(([,s])=>s!=null).sort(([,a],[,b])=>a-b);
+    if (ranked.length > 0) lastWinnerId = ranked[0][0];
+  } else if (legacyRounds.length > 0) {
+    const lastR = [...legacyRounds].sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+    if (lastR.scores) {
+      const ranked = Object.entries(lastR.scores).sort(([,a],[,b])=>a-b);
+      if (ranked.length > 0) lastWinnerId = ranked[0][0];
+    }
+  }
+
   return state.players.map(p => {
     let pts = 0, roundsPlayed = 0, bestStrokes = Infinity;
-    rounds.forEach(r => {
+
+    // New leg system — only count finalized legs
+    legs.filter(l => l.status === 'final').forEach(leg => {
+      const legPts = leg.finalPoints || calcLegPoints(leg);
+      if (legPts[p.id] != null) {
+        pts += legPts[p.id];
+        roundsPlayed++;
+        const scores = leg.finalScores || getMergedFieldScores(leg);
+        if (scores[p.id] != null && scores[p.id] < bestStrokes) bestStrokes = scores[p.id];
+      }
+    });
+
+    // Legacy rounds
+    legacyRounds.forEach(r => {
       if (r.scores && r.scores[p.id] != null) {
         roundsPlayed++;
         const strokes = r.scores[p.id];
-        // Find finish place in this round
         const sortedScores = Object.values(r.scores).sort((a,b)=>a-b);
         const place = sortedScores.indexOf(strokes) + 1;
         pts += bgaPointsForPlace(place);
         if (strokes < bestStrokes) bestStrokes = strokes;
       }
     });
-    return { ...p, pts, roundsPlayed, bestStrokes: bestStrokes === Infinity ? null : bestStrokes };
-  }).filter(p => p.roundsPlayed > 0 || getBgaSeasonRounds().length === 0)
+
+    const isHot = p.id === lastWinnerId;
+    return { ...p, pts, roundsPlayed, bestStrokes: bestStrokes === Infinity ? null : bestStrokes, isHot };
+  }).filter(p => p.roundsPlayed > 0 || (legs.length === 0 && legacyRounds.length === 0))
     .sort((a,b) => b.pts - a.pts || a.roundsPlayed - b.roundsPlayed);
 }
 
@@ -2512,43 +2613,90 @@ function renderBgaStandings() {
     return;
   }
   const standings = getBgaStandings();
-  const rounds = getBgaSeasonRounds();
+  const legs = getBgaSeasonLegs();
+  const legacyRounds = getBgaSeasonRounds();
+  const totalLegs = bgaSchedule.filter(c => !c.isMasters).length || 0;
+  const completedLegs = legs.filter(l => l.status === 'final').length + legacyRounds.length;
+  const cutLine = 4;
 
-  if (rounds.length === 0) {
-    el.innerHTML = `<div class="bga-leaderboard">
-      <div class="bga-lb-header">
-        <div><div class="bga-lb-title">LEADERBOARD</div><div class="bga-lb-subtitle">${escHtml(bgaState.activeSeason.name)} · 0 rounds played</div></div>
+  // ── Next Up banner from schedule ──
+  let nextUpHtml = '';
+  if (bgaSchedule.length > 0) {
+    const loggedCourses = new Set([
+      ...legs.map(l => l.course),
+      ...legacyRounds.map(r => r.name)
+    ]);
+    const nextLeg = bgaSchedule.find(c => !c.isMasters && !loggedCourses.has(`${c.flag} ${c.name}`));
+    // Also check schedule dates
+    const savedSched = bgaState.activeSeason?.schedule || [];
+    if (nextLeg) {
+      const schedEntry = savedSched.find(s => s.course === `${nextLeg.flag} ${nextLeg.name}`);
+      const dateStr = schedEntry?.date ? ` · ${formatDate(schedEntry.date)}` : '';
+      nextUpHtml = `<div class="bga-next-up-banner">
+        <div style="font-size:9px;letter-spacing:2px;color:rgba(200,168,75,.5);text-transform:uppercase;margin-bottom:3px;">NEXT UP</div>
+        <div style="font-size:14px;font-weight:700;color:#e8f5e9;">${nextLeg.flag} ${escHtml(nextLeg.name)}</div>
+        <div style="font-size:11px;color:rgba(200,168,75,.6);">${escHtml(nextLeg.loc)}${dateStr}</div>
+      </div>`;
+    }
+  }
+
+  // ── Season progress bar ──
+  const progressPct = totalLegs > 0 ? Math.round((completedLegs / totalLegs) * 100) : 0;
+  const progressHtml = totalLegs > 0 ? `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(200,168,75,.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">
+        <span>Season Progress</span>
+        <span>${completedLegs} / ${totalLegs} Legs Complete</span>
       </div>
-      <div style="padding:40px 20px;text-align:center;color:rgba(200,168,75,.4);">
-        <div style="font-size:13px;">No rounds yet — log the first round to see standings.</div>
+      <div style="background:#0c1f0e;border-radius:4px;height:6px;overflow:hidden;">
+        <div style="width:${progressPct}%;height:100%;background:linear-gradient(90deg,var(--flag),#f0d080);border-radius:4px;transition:width .5s;"></div>
       </div>
-    </div>`;
+    </div>` : '';
+
+  if (completedLegs === 0 && legacyRounds.length === 0) {
+    el.innerHTML = `
+      ${nextUpHtml}
+      <div class="bga-leaderboard">
+        <div class="bga-lb-header">
+          <div><div class="bga-lb-title">LEADERBOARD</div><div class="bga-lb-subtitle">${escHtml(bgaState.activeSeason.name)} · 0 legs played</div></div>
+        </div>
+        <div style="padding:40px 20px;text-align:center;color:rgba(200,168,75,.4);">
+          <div style="font-size:13px;">No finalized legs yet — log lobbies and finalize a leg to see standings.</div>
+        </div>
+      </div>`;
     return;
   }
 
   const posCls = ['p1','p2','p3'];
-  const cutLine = 4; // top 4 qualify
+  const leaderPts = standings[0]?.pts || 0;
+  const cutPlayerPts = standings[cutLine - 1]?.pts || 0;
 
-  let html = `<div class="bga-leaderboard">
+  let html = `
+    ${nextUpHtml}
+    ${progressHtml}
+    <div class="bga-leaderboard">
     <div class="bga-lb-header">
       <div>
         <div class="bga-lb-title">LEADERBOARD</div>
-        <div class="bga-lb-subtitle">${escHtml(bgaState.activeSeason.name)} · ${rounds.length} round${rounds.length!==1?'s':''} played</div>
+        <div class="bga-lb-subtitle">${escHtml(bgaState.activeSeason.name)} · ${completedLegs} leg${completedLegs!==1?'s':''} played</div>
       </div>
-      <div style="font-size:10px;color:rgba(200,168,75,.5);text-align:right;">FedEx Cup Points</div>
+      <div style="font-size:10px;color:rgba(200,168,75,.5);text-align:right;line-height:1.5;">BGA Points<br><span style="font-size:9px;opacity:.7;">Top 4 qualify</span></div>
     </div>`;
 
   standings.forEach((p, i) => {
     const isLeader = i === 0;
     const qualifies = i < cutLine;
+    const ptsBack = i === 0 ? '' : `<span style="font-size:10px;color:rgba(232,245,233,.35);margin-right:6px;">-${leaderPts - p.pts}</span>`;
+    const gapToCut = !qualifies ? `<span style="font-size:9px;color:var(--accent2);margin-right:4px;">+${cutPlayerPts - p.pts + 1} to qualify</span>` : '';
+    const hotBadge = p.isHot ? '<span style="font-size:13px;margin-left:4px;" title="Won last leg">🔥</span>' : '';
     html += `<div class="bga-lb-row${isLeader?' leader':''}">
       <div class="bga-lb-pos ${posCls[i]||''}">${i+1}</div>
-      <div class="bga-lb-name">${p.emoji} ${escHtml(p.name)}</div>
-      ${qualifies ? '<span class="qualify-badge">QUALIFIES</span>' : ''}
+      <div class="bga-lb-name">${p.emoji} ${escHtml(p.name)}${hotBadge}</div>
+      ${qualifies ? '<span class="qualify-badge">✓ IN</span>' : gapToCut}
       <div class="bga-lb-rounds">${p.roundsPlayed}R</div>
+      ${ptsBack}
       <div class="bga-lb-pts">${p.pts}</div>
     </div>`;
-    // Cut line after 4th place
     if (i === cutLine - 1 && standings.length > cutLine) {
       html += `<div class="bga-qualify-cut">✂ CUT — Top ${cutLine} qualify for Masters</div>`;
     }
@@ -2556,19 +2704,19 @@ function renderBgaStandings() {
 
   html += `</div>`;
 
-  // Leader card
+  // Leader spotlight
   if (standings[0]) {
     const leader = standings[0];
     html += `<div style="margin-top:12px;background:#0c2210;border:1px solid rgba(200,168,75,.2);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
       <div style="font-size:28px;">${leader.emoji}</div>
-      <div>
-        <div style="font-size:10px;letter-spacing:2px;color:rgba(200,168,75,.5);text-transform:uppercase;">Current Leader</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--flag);">${escHtml(leader.name)}</div>
-        <div style="font-size:11px;color:rgba(232,245,233,.4);">${leader.pts} pts · ${leader.roundsPlayed} round${leader.roundsPlayed!==1?'s':''} played</div>
+      <div style="flex:1;">
+        <div style="font-size:10px;letter-spacing:2px;color:rgba(200,168,75,.5);text-transform:uppercase;">Season Leader</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--flag);">${escHtml(leader.name)}${leader.isHot?' 🔥':''}</div>
+        <div style="font-size:11px;color:rgba(232,245,233,.4);">${leader.pts.toLocaleString()} pts · ${leader.roundsPlayed} leg${leader.roundsPlayed!==1?'s':''} played</div>
       </div>
-      <div style="margin-left:auto;text-align:right;">
+      <div style="text-align:right;">
         <div style="font-size:10px;color:rgba(200,168,75,.5);letter-spacing:1px;">TOP 4 QUALIFY</div>
-        <div style="font-size:10px;color:rgba(232,245,233,.4);margin-top:2px;">🌿 St Andrews · BGA Masters</div>
+        <div style="font-size:10px;color:rgba(232,245,233,.4);margin-top:2px;">🌿 St Andrews</div>
       </div>
     </div>`;
   }
@@ -2579,17 +2727,17 @@ function renderBgaRounds() {
   const noSeason = document.getElementById('bga-no-season-log');
   const logBtn = document.getElementById('bga-log-btn');
 
-  // ── Form visibility controls (safe — only show/hide, never wipe inputs) ──
   if (!bgaState.activeSeason) {
     if (noSeason) noSeason.style.display = 'block';
     if (logBtn) logBtn.style.display = 'none';
-    if (!bgaLogFormOpen) document.getElementById('bga-log-form').style.display = 'none';
+    const form = document.getElementById('bga-log-form');
+    if (form && !bgaLogFormOpen) form.style.display = 'none';
   } else {
     if (noSeason) noSeason.style.display = 'none';
     if (logBtn) logBtn.style.display = bgaLogFormOpen ? 'none' : 'inline-flex';
   }
 
-  // Populate stroke input rows only once when form first opens (never overwrite typed values)
+  // Populate stroke inputs once on open only
   if (bgaLogFormOpen) {
     const container = document.getElementById('bga-stroke-inputs');
     if (container && container.children.length === 0) {
@@ -2600,7 +2748,6 @@ function renderBgaRounds() {
           <div style="font-size:11px;color:rgba(200,168,75,.5);width:50px;text-align:right;">strokes</div>
         </div>`).join('');
     }
-    // Don't touch the list while form is open — just return
     return;
   }
 
@@ -2610,36 +2757,112 @@ function renderBgaRounds() {
 function renderBgaRoundsList() {
   const list = document.getElementById('bga-rounds-list');
   if (!list) return;
-  const rounds = getBgaSeasonRounds().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if (rounds.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="big">⛳</div>No rounds logged yet.</div>';
-    return;
-  }
-  list.innerHTML = rounds.map(r => {
-    const scored = Object.entries(r.scores||{});
-    const sorted = scored.sort(([,a],[,b])=>a-b);
-    return `<div class="bga-scorecard">
+  const legs = getBgaSeasonLegs().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const legacyRounds = getBgaSeasonRounds().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const medals = ['🥇','🥈','🥉'];
+
+  let html = '';
+
+  // ── New multi-lobby legs ──
+  legs.forEach(leg => {
+    const isFinalized = leg.status === 'final';
+    const lobbies = leg.lobbies || {};
+    const lobbyKeys = Object.keys(lobbies).sort();
+    const finalScores = leg.finalScores || {};
+    const finalPoints = leg.finalPoints || {};
+
+    // Full field sorted
+    const fieldScores = isFinalized ? finalScores : getMergedFieldScores(leg);
+    const ranked = Object.entries(fieldScores)
+      .filter(([,s]) => s != null)
+      .sort(([,a],[,b]) => a - b);
+
+    const winnerPid = ranked[0]?.[0];
+    const winner = state.players.find(p => p.id === winnerPid);
+    const winnerStrokes = ranked[0]?.[1];
+    const gap = ranked.length > 1 ? ranked[1][1] - winnerStrokes : null;
+
+    html += `<div class="bga-scorecard" style="${!isFinalized ? 'border-color:rgba(200,168,75,.3);' : ''}">
+      <div class="bga-scorecard-header">
+        <div style="flex:1;">
+          <div class="bga-scorecard-title">⛳ ${escHtml(leg.course||'Unknown Course')}</div>
+          <div class="bga-scorecard-course">${formatDate(leg.date)} · ${lobbyKeys.length} Lobb${lobbyKeys.length===1?'y':'ies'} · ${isFinalized ? '<span style="color:var(--green);">✓ FINAL</span>' : '<span style="color:var(--flag);">⏳ PENDING</span>'}</div>
+        </div>
+        ${!isFinalized ? `<button class="btn btn-pga-gold btn-sm" onclick="finalizeBgaLeg('${leg._key}')" style="font-size:10px;padding:6px 10px;">🏁 Finalize Leg</button>` : ''}
+        <button class="icon-btn del" onclick="deleteBgaLeg('${leg._key}')" title="Delete" style="margin-left:6px;">✕</button>
+      </div>
+
+      ${lobbyKeys.map(lk => {
+        const lobbyScores = lobbies[lk] || {};
+        const lobbyRanked = Object.entries(lobbyScores).filter(([,s])=>s!=null).sort(([,a],[,b])=>a-b);
+        return `<div style="padding:6px 16px 2px;border-bottom:1px solid rgba(255,255,255,.04);">
+          <div style="font-size:9px;letter-spacing:2px;color:rgba(200,168,75,.45);text-transform:uppercase;margin-bottom:4px;">LOBBY ${lk}</div>
+          ${lobbyRanked.map(([pid, strokes]) => {
+            const player = state.players.find(p=>p.id===pid);
+            return `<div style="display:flex;align-items:center;gap:10px;padding:4px 0;font-size:12px;color:#c8e6c9;">
+              <span style="width:20px;color:rgba(255,255,255,.25);">—</span>
+              <span style="flex:1;">${player?.emoji||''} ${escHtml(player?.name||pid)}</span>
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${strokes}</span>
+              <span style="font-size:10px;color:rgba(200,168,75,.4);width:40px;text-align:right;">strokes</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('')}
+
+      ${ranked.length > 0 ? `
+        <div style="padding:8px 16px 4px;">
+          <div style="font-size:9px;letter-spacing:2px;color:rgba(200,168,75,.45);text-transform:uppercase;margin-bottom:6px;">FULL FIELD ${isFinalized ? '— FINAL RESULT' : '— PREVIEW'}</div>
+          ${ranked.map(([pid, strokes], i) => {
+            const player = state.players.find(p=>p.id===pid);
+            const pts = isFinalized ? (finalPoints[pid] || 0) : bgaPointsForPlace(i+1);
+            const strokesBack = i === 0 ? '' : `<span style="font-size:10px;color:rgba(232,245,233,.3);margin-right:4px;">+${strokes - ranked[0][1]}</span>`;
+            return `<div class="bga-scorecard-row${i===0?' winner-row':''}">
+              <div class="bga-sc-pos">${medals[i]||((i+1)+'.')}</div>
+              <div class="bga-sc-name">${player?.emoji||''} ${escHtml(player?.name||pid)}</div>
+              <div class="bga-sc-strokes">${strokes}</div>
+              ${strokesBack}
+              <div class="bga-sc-pts">+${pts}</div>
+            </div>`;
+          }).join('')}
+          ${gap != null && isFinalized ? `<div style="font-size:10px;color:rgba(200,168,75,.5);padding:6px 0 2px;text-align:center;">${winner?.emoji} ${escHtml(winner?.name||'')} won by ${gap} stroke${gap!==1?'s':''}</div>` : ''}
+        </div>` : ''}
+    </div>`;
+  });
+
+  // ── Legacy single-lobby rounds ──
+  legacyRounds.forEach(r => {
+    const sorted = Object.entries(r.scores||{}).sort(([,a],[,b])=>a-b);
+    const gap = sorted.length > 1 ? sorted[1][1] - sorted[0][1] : null;
+    const winner = state.players.find(p => p.id === sorted[0]?.[0]);
+    html += `<div class="bga-scorecard">
       <div class="bga-scorecard-header">
         <div>
           <div class="bga-scorecard-title">⛳ ${escHtml(r.name||'Untitled Round')}</div>
-          <div class="bga-scorecard-course">${formatDate(r.date)} · EA Sports PGA Tour</div>
+          <div class="bga-scorecard-course">${formatDate(r.date)} · Single Lobby · <span style="color:var(--green);">✓ FINAL</span></div>
         </div>
         <button class="icon-btn del" onclick="deleteBgaRound('${r._key}')" title="Delete">✕</button>
       </div>
       ${sorted.map(([pid, strokes], i) => {
         const player = state.players.find(p=>p.id===pid);
         const pts = bgaPointsForPlace(i+1);
-        const medals = ['🥇','🥈','🥉'];
+        const strokesBack = i === 0 ? '' : `<span style="font-size:10px;color:rgba(232,245,233,.3);margin-right:4px;">+${strokes - sorted[0][1]}</span>`;
         return `<div class="bga-scorecard-row${i===0?' winner-row':''}">
           <div class="bga-sc-pos">${medals[i]||i+1+'.'}</div>
-          <div class="bga-sc-name">${player?player.emoji:''} ${escHtml(player?.name||pid)}</div>
+          <div class="bga-sc-name">${player?.emoji||''} ${escHtml(player?.name||pid)}</div>
           <div class="bga-sc-strokes">${strokes}</div>
-          <div style="font-size:10px;color:rgba(200,168,75,.5);margin-right:4px;">strokes</div>
-          <div class="bga-sc-pts">+${pts} pts</div>
+          ${strokesBack}
+          <div class="bga-sc-pts">+${pts}</div>
         </div>`;
       }).join('')}
+      ${gap != null ? `<div style="font-size:10px;color:rgba(200,168,75,.5);padding:6px 16px;text-align:center;">${winner?.emoji} ${escHtml(winner?.name||'')} won by ${gap} stroke${gap!==1?'s':''}</div>` : ''}
     </div>`;
-  }).join('');
+  });
+
+  if (!html) {
+    list.innerHTML = '<div class="empty-state"><div class="big">⛳</div>No legs logged yet.</div>';
+  } else {
+    list.innerHTML = html;
+  }
 }
 
 function renderBgaMasters() {
@@ -2746,15 +2969,106 @@ function renderBgaHof() {
 }
 
 function renderBgaSchedule() {
-  // Just ensure the output area exists; actual generation is on button click
   const out = document.getElementById('bga-schedule-output');
   if (!out) return;
-  if (!out.innerHTML) {
+  // If we have a saved schedule, render it (with saved dates if any)
+  if (bgaSchedule && bgaSchedule.length > 0) {
+    renderBgaScheduleOutput();
+  } else if (!out.innerHTML) {
     out.innerHTML = `<div style="text-align:center;padding:32px 20px;color:rgba(200,168,75,.35);">
       <div style="font-size:40px;margin-bottom:10px;">🎲</div>
       <div style="font-size:12px;letter-spacing:1px;">Choose your options above and hit Randomize Schedule</div>
     </div>`;
   }
+}
+
+function renderBgaScheduleOutput() {
+  const out = document.getElementById('bga-schedule-output');
+  if (!out || !bgaSchedule || bgaSchedule.length === 0) return;
+
+  // Get saved dates from active season schedule or localStorage
+  const savedDates = bgaScheduleDates || {};
+  const legs = getBgaSeasonLegs();
+  const legacyRounds = getBgaSeasonRounds();
+  const loggedCourses = new Set([
+    ...legs.map(l => l.course),
+    ...legacyRounds.map(r => r.name),
+  ]);
+  const finalizedCourses = new Set([
+    ...legs.filter(l=>l.status==='final').map(l=>l.course),
+    ...legacyRounds.map(r=>r.name),
+  ]);
+  const pendingCourses = new Set(
+    legs.filter(l=>l.status!=='final').map(l=>l.course)
+  );
+
+  const regular = bgaSchedule.filter(c => !c.isMasters);
+  const masters = bgaSchedule.find(c => c.isMasters);
+
+  let html = `<div class="bga-schedule-card">
+    <div class="bga-schedule-header">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--flag);">BGA SEASON SCHEDULE</div>
+        <div style="font-size:10px;color:rgba(200,168,75,.5);letter-spacing:1px;">EA Sports PGA Tour · ${regular.length + 1} Events</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="btn btn-pga btn-sm" onclick="generateBgaSchedule()" style="font-size:10px;">🎲 Re-roll</button>
+        <button class="btn btn-pga btn-sm" onclick="saveBgaScheduleDates()" style="font-size:10px;">💾 Save Dates</button>
+        <button class="btn btn-pga btn-sm" onclick="copyBgaSchedule()" style="font-size:10px;">📋 Copy</button>
+      </div>
+    </div>
+    ${regular.map((c, i) => {
+      const courseName = `${c.flag} ${c.name}`;
+      const isFinalized = finalizedCourses.has(courseName);
+      const isPending = pendingCourses.has(courseName);
+      const statusIcon = isFinalized ? '✅' : isPending ? '🟡' : '⬜';
+      const statusLabel = isFinalized ? 'COMPLETE' : isPending ? 'IN PROGRESS' : 'UPCOMING';
+      const statusColor = isFinalized ? '#4caf50' : isPending ? '#c8a84b' : 'rgba(232,245,233,.3)';
+      return `<div class="bga-schedule-item">
+        <div class="bga-sched-num">${statusIcon}</div>
+        <div style="flex:1;">
+          <div class="bga-sched-name">${c.flag} ${escHtml(c.name)}</div>
+          <div class="bga-sched-loc">${escHtml(c.loc)} · ${escHtml(c.category)}</div>
+        </div>
+        <div style="text-align:right;min-width:90px;">
+          <input type="date" class="bga-date-input" data-course="${escHtml(courseName)}"
+            value="${savedDates[courseName]||''}"
+            style="background:#0c1f0e;border:1px solid #2a5c30;color:#e8f5e9;border-radius:5px;padding:4px 6px;font-size:11px;outline:none;font-family:inherit;width:120px;"
+            onchange="bgaScheduleDates[this.dataset.course]=this.value" />
+          <div style="font-size:9px;color:${statusColor};letter-spacing:1px;margin-top:2px;">${statusLabel}</div>
+        </div>
+      </div>`;
+    }).join('')}
+    ${masters ? `<div class="bga-schedule-item masters-item">
+      <div class="bga-sched-num">🌿</div>
+      <div style="flex:1;">
+        <div class="bga-sched-name">${masters.flag} ${escHtml(masters.name)}</div>
+        <div class="bga-sched-loc">${escHtml(masters.loc)} · THE OPEN · 18 Holes · Lowest Score Wins</div>
+      </div>
+      <div style="text-align:right;min-width:90px;">
+        <input type="date" class="bga-date-input" data-course="${escHtml(`${masters.flag} ${masters.name}`)}"
+          value="${savedDates[`${masters.flag} ${masters.name}`]||''}"
+          style="background:#0c1f0e;border:1px solid #2a5c30;color:var(--flag);border-radius:5px;padding:4px 6px;font-size:11px;outline:none;font-family:inherit;width:120px;"
+          onchange="bgaScheduleDates[this.dataset.course]=this.value" />
+        <div style="font-size:9px;color:var(--flag);letter-spacing:1px;margin-top:2px;">🌿 MASTERS FINAL</div>
+      </div>
+    </div>` : ''}
+  </div>`;
+  out.innerHTML = html;
+}
+
+async function saveBgaScheduleDates() {
+  if (!bgaState.activeSeason) { showToast('No active season to save dates to!'); return; }
+  // Save dates map to Firebase under the active season
+  const scheduleWithDates = bgaSchedule.map(c => ({
+    course: `${c.flag} ${c.name}`,
+    date: bgaScheduleDates[`${c.flag} ${c.name}`] || '',
+    isMasters: c.isMasters || false,
+  }));
+  await dbPatch(`bga/activeSeason`, { schedule: scheduleWithDates });
+  try { localStorage.setItem('bga_schedule_dates', JSON.stringify(bgaScheduleDates)); } catch(e) {}
+  await fetchAll();
+  showToast('📅 Schedule dates saved!');
 }
 
 function generateBgaSchedule() {
@@ -2781,44 +3095,17 @@ function generateBgaSchedule() {
   // Persist schedule for use in the log-round dropdown
   bgaSchedule = selected.concat([masters]);
   window._bgaLastSchedule = bgaSchedule;
-  try { localStorage.setItem('bga_schedule', JSON.stringify(bgaSchedule)); } catch(e) {}
+  bgaScheduleDates = {}; // reset dates on re-roll
+  try {
+    localStorage.setItem('bga_schedule', JSON.stringify(bgaSchedule));
+    localStorage.removeItem('bga_schedule_dates');
+  } catch(e) {}
 
   // Update the round-name dropdown if it's in the DOM
   populateBgaRoundDropdown();
 
-  const out = document.getElementById('bga-schedule-output');
-
-  let html = `<div class="bga-schedule-card">
-    <div class="bga-schedule-header">
-      <div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--flag);">BGA SEASON SCHEDULE</div>
-        <div style="font-size:10px;color:rgba(200,168,75,.5);letter-spacing:1px;">EA Sports PGA Tour · ${selected.length + 1} Events</div>
-      </div>
-      <button class="btn btn-pga btn-sm" onclick="generateBgaSchedule()">🎲 Re-roll</button>
-    </div>
-    ${selected.map((c, i) => `
-      <div class="bga-schedule-item">
-        <div class="bga-sched-num">${i+1}</div>
-        <div style="flex:1;">
-          <div class="bga-sched-name">${c.flag} ${escHtml(c.name)}</div>
-          <div class="bga-sched-loc">${escHtml(c.loc)} · ${escHtml(c.category)}</div>
-        </div>
-        <span class="bga-sched-type sched-regular">Regular</span>
-      </div>`).join('')}
-    <div class="bga-schedule-item masters-item">
-      <div class="bga-sched-num">${selected.length + 1}</div>
-      <div style="flex:1;">
-        <div class="bga-sched-name">${masters.flag} ${escHtml(masters.name)}</div>
-        <div class="bga-sched-loc">${escHtml(masters.loc)} · THE OPEN · 18 Holes · Lowest Score Wins</div>
-      </div>
-      <span class="bga-sched-type sched-masters">🌿 MASTERS</span>
-    </div>
-  </div>
-  <div style="text-align:center;margin-top:10px;">
-    <button class="btn btn-pga btn-sm" onclick="copyBgaSchedule()" style="font-size:11px;">📋 Copy Schedule</button>
-  </div>`;
-
-  out.innerHTML = html;
+  // Render the schedule card with date pickers
+  renderBgaScheduleOutput();
 }
 
 function populateBgaRoundDropdown() {
@@ -2835,19 +3122,24 @@ function populateBgaRoundDropdown() {
   }
   if (hint) hint.style.display = 'none';
 
-  // Figure out which rounds have already been logged this season
-  const loggedNames = new Set(
-    getBgaSeasonRounds().map(r => r.name)
-  );
+  // Figure out which courses already have finalized or open legs
+  const legs = getBgaSeasonLegs();
+  const finalizedCourses = new Set([
+    ...legs.filter(l=>l.status==='final').map(l=>l.course),
+    ...getBgaSeasonRounds().map(r=>r.name),
+  ]);
+  const openCourses = new Set(legs.filter(l=>l.status!=='final').map(l=>l.course));
 
-  // Regular rounds only (no Masters — that goes through End Season flow)
   const regularRounds = bgaSchedule.filter(c => !c.isMasters);
 
   sel.innerHTML = '<option value="">— Select course —</option>' +
     regularRounds.map((c, i) => {
-      const alreadyLogged = loggedNames.has(`${c.flag} ${c.name}`);
-      const label = `${i + 1}. ${c.flag} ${c.name}${alreadyLogged ? ' ✓' : ''}`;
-      return `<option value="${escHtml(c.flag + ' ' + c.name)}" ${alreadyLogged ? 'style="color:rgba(200,168,75,.4);"' : ''}>${label}</option>`;
+      const courseName = `${c.flag} ${c.name}`;
+      const isFinalized = finalizedCourses.has(courseName);
+      const isOpen = openCourses.has(courseName);
+      const suffix = isFinalized ? ' ✓' : isOpen ? ' ⏳' : '';
+      const label = `${i + 1}. ${c.flag} ${c.name}${suffix}`;
+      return `<option value="${escHtml(courseName)}" ${isFinalized ? 'style="color:rgba(200,168,75,.4);"' : ''}>${label}</option>`;
     }).join('');
 
   // Restore previous selection if still valid
@@ -2917,9 +3209,7 @@ function toggleBgaLogForm(open) {
   if (open) {
     const dateEl = document.getElementById('bga-round-date');
     if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
-    // Populate course dropdown from saved schedule
     populateBgaRoundDropdown();
-    // Rebuild stroke inputs fresh
     const container = document.getElementById('bga-stroke-inputs');
     if (container) container.innerHTML = state.players.map(p => `
       <div class="bga-score-row">
@@ -2933,11 +3223,13 @@ function toggleBgaLogForm(open) {
 async function logBgaRound() {
   if (!bgaState.activeSeason) { showToast('No active BGA season!'); return; }
   const roundSel = document.getElementById('bga-round-name');
-  const name = roundSel ? roundSel.value.trim() : '';
+  const courseName = roundSel ? roundSel.value.trim() : '';
   const date = document.getElementById('bga-round-date').value;
-  if (!name) { showToast('Select a course first!'); return; }
+  const lobbyRadio = document.querySelector('input[name="bga-lobby"]:checked');
+  const lobby = lobbyRadio?.value || 'A';
+  if (!courseName) { showToast('Select a course first!'); return; }
 
-  // Collect scores — only include players with valid numbers
+  // Collect scores
   const scores = {};
   state.players.forEach(p => {
     const val = document.getElementById('bga-strokes-'+p.id)?.value;
@@ -2945,23 +3237,71 @@ async function logBgaRound() {
       scores[p.id] = parseInt(val);
     }
   });
-
   if (Object.keys(scores).length < 2) { showToast('Enter strokes for at least 2 players!'); return; }
 
-  const round = {
-    seasonId: bgaState.activeSeason.id,
-    name,
-    date: date || new Date().toISOString().slice(0,10),
-    scores,
-    loggedAt: Date.now(),
-  };
+  const dateVal = date || new Date().toISOString().slice(0,10);
 
-  await dbPush('bga/rounds', round);
-  // Reset dropdown
+  // Find or create the leg for this course in Firebase
+  const existingLeg = (bgaState.legs || []).find(l =>
+    l.seasonId === bgaState.activeSeason.id && l.course === courseName && l.status !== 'final'
+  );
+
+  if (existingLeg) {
+    // Add this lobby to the existing open leg
+    await dbPatch(`bga/legs/${existingLeg._key}`, {
+      [`lobbies/${lobby}`]: scores,
+    });
+    showToast(`⛳ Lobby ${lobby} logged for ${courseName}!`);
+  } else {
+    // Create a new leg
+    const legData = {
+      seasonId: bgaState.activeSeason.id,
+      course: courseName,
+      date: dateVal,
+      status: 'open',
+      lobbies: { [lobby]: scores },
+      loggedAt: Date.now(),
+    };
+    await dbPush('bga/legs', legData);
+    showToast(`⛳ Lobby ${lobby} logged — new leg started!`);
+  }
+
   if (roundSel) roundSel.value = '';
   toggleBgaLogForm(false);
   await fetchAll();
-  showToast('⛳ Round logged!');
+}
+
+async function finalizeBgaLeg(legKey) {
+  const leg = bgaState.legs.find(l => l._key === legKey);
+  if (!leg) return;
+  const fieldScores = getMergedFieldScores(leg);
+  const playerCount = Object.keys(fieldScores).length;
+  if (playerCount < 2) { showToast('Need at least 2 players across lobbies!'); return; }
+
+  const ranked = Object.entries(fieldScores).sort(([,a],[,b])=>a-b);
+  const names = ranked.map(([pid,s],i)=>{
+    const pl = state.players.find(p=>p.id===pid);
+    return `${i+1}. ${pl?.emoji||''} ${pl?.name||pid}: ${s} strokes`;
+  }).join('\n');
+
+  if (!confirm(`Finalize "${leg.course}"?\n\nFull field (${playerCount} players):\n${names}\n\nThis will lock points — cannot be undone.`)) return;
+
+  const finalPoints = calcLegPoints(leg);
+  await dbPatch(`bga/legs/${legKey}`, {
+    status: 'final',
+    finalScores: fieldScores,
+    finalPoints,
+    finalizedAt: Date.now(),
+  });
+  await fetchAll();
+  showToast('🏁 Leg finalized! Points locked.');
+}
+
+async function deleteBgaLeg(key) {
+  if (!confirm('Delete this entire leg? All lobby scores and points will be removed.')) return;
+  await dbDelete(`bga/legs/${key}`);
+  await fetchAll();
+  showToast('Leg deleted.');
 }
 
 async function deleteBgaRound(key) {
