@@ -1153,6 +1153,7 @@ let bgaSchedule = []; // persisted schedule: [{name, loc, flag, isMasters}, ...]
 let bgaScheduleDates = {}; // {courseName: 'YYYY-MM-DD'}
 let tournamentSelectedPlayers = new Set();
 let activeTournamentTab = null; // tournament ID or null for "new" form
+let addingPlayerToTournId = null; // tournament ID when add-player panel is open
 let editingGameId = null;
 let emojiPickerFor = null;
 let addGameFormOpen = false;
@@ -2116,6 +2117,7 @@ function renderTournament() {
 
 function selectTournTab(id) {
   activeTournamentTab = id;
+  addingPlayerToTournId = null;
   renderTournament();
 }
 
@@ -2201,9 +2203,25 @@ function renderOneTournament(tourn) {
         <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;">${escHtml(tourn.gameName)} Tournament</div>
         <div style="font-size:11px;color:var(--muted);">${tourn.playerIds.length} players · ${tourn.phase === 'roundrobin' ? 'Round Robin' : tourn.phase === 'finals' ? '🔥 Finals' : 'Complete'}</div>
       </div>
-      <button class="btn btn-danger btn-sm" style="margin-left:auto;" onclick="deleteTournament('${tourn.id}')">Delete</button>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        ${tourn.phase === 'roundrobin' ? `<button class="btn btn-sm btn-secondary" onclick="toggleAddPlayerPanel('${tourn.id}')">+ Add Player</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="deleteTournament('${tourn.id}')">Delete</button>
+      </div>
     </div>
-  </div>`;
+  </div>
+  ${tourn.phase === 'roundrobin' && addingPlayerToTournId === tourn.id ? (() => {
+    const available = state.players.filter(p => !tourn.playerIds.includes(p.id));
+    if (available.length === 0) return `<div class="card" style="margin-bottom:12px;color:var(--muted);font-size:13px;">No players available to add.</div>`;
+    return `<div class="card" style="margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Select a player to add:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${available.map(p => `
+          <button class="btn btn-sm btn-secondary" onclick="addPlayerToTournament('${tourn.id}','${p.id}')">
+            ${p.emoji} ${escHtml(p.name)}
+          </button>`).join('')}
+      </div>
+    </div>`;
+  })() : ''}`;
 
   // === ROUND ROBIN PHASE ===
   html += `<div class="bracket-section">
@@ -2376,6 +2394,24 @@ async function clearRRResult(tournId, matchupIdx) {
   matchups[matchupIdx] = { ...matchups[matchupIdx], winnerId: null };
   await dbPatch(`tournaments/${tournId}`, { matchups });
   await fetchAll();
+}
+
+function toggleAddPlayerPanel(tournId) {
+  addingPlayerToTournId = addingPlayerToTournId === tournId ? null : tournId;
+  renderTournament();
+}
+
+async function addPlayerToTournament(tournId, playerId) {
+  const tourn = state.tournaments.find(t => t.id === tournId);
+  if (!tourn || tourn.playerIds.includes(playerId)) return;
+  const newMatchups = tourn.playerIds.map(existingId => ({ p1: existingId, p2: playerId, winnerId: null }));
+  const updatedPlayerIds = [...tourn.playerIds, playerId];
+  const updatedMatchups = [...tourn.matchups, ...newMatchups];
+  await dbPatch(`tournaments/${tournId}`, { playerIds: updatedPlayerIds, matchups: updatedMatchups });
+  addingPlayerToTournId = null;
+  await fetchAll();
+  const player = state.players.find(p => p.id === playerId);
+  showToast(`${player?.emoji || ''} ${player?.name || 'Player'} added to tournament!`);
 }
 
 async function advanceToFinals(tournId) {
