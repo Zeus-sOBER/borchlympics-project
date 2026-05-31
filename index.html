@@ -2228,21 +2228,26 @@ function renderOneTournament(tourn) {
     <div class="bracket-title">Round Robin</div>`;
 
   // Standings table
+  const hasTie = rrStandings.some(s => s.tiebreakerUsed);
+  const tbLabels = { h2h: '⚖ H2H', losses: '⚖ L', random: '⚖ –' };
   html += `<div class="card" style="margin-bottom:12px;">
     <table class="rr-table">
-      <thead><tr><th>Player</th><th>W</th><th>L</th><th>Played</th></tr></thead>
+      <thead><tr><th>Player</th><th>W</th><th>L</th><th>Played</th>${hasTie ? '<th>H2H</th>' : ''}</tr></thead>
       <tbody>
         ${rrStandings.map((s, i) => {
           const adv = tourn.phase !== 'roundrobin' && i < 2;
           const elim = tourn.phase !== 'roundrobin' && i >= 2;
           const badge = adv ? '<span class="adv-badge">▲ ADV</span>' : elim ? '<span class="elim-badge">✕ OUT</span>' : '';
-          return `<tr><td>${s.emoji} <strong>${escHtml(s.name)}</strong> ${badge}</td>
+          const tbBadge = s.tiebreakerUsed ? `<span style="font-size:10px;color:var(--gold);margin-left:4px;" title="Ranked by tiebreaker">${tbLabels[s.tiebreakerUsed]||''}</span>` : '';
+          return `<tr><td>${s.emoji} <strong>${escHtml(s.name)}</strong> ${badge}${tbBadge}</td>
             <td style="color:var(--green);font-weight:700;">${s.wins}</td>
             <td style="color:var(--accent2);">${s.losses}</td>
-            <td>${s.played}</td></tr>`;
+            <td>${s.played}</td>
+            ${hasTie ? `<td style="color:var(--gold);font-size:12px;">${s.tiebreakerUsed ? s.h2hWins : '—'}</td>` : ''}</tr>`;
         }).join('')}
       </tbody>
     </table>
+    ${hasTie ? `<div style="font-size:11px;color:var(--muted);margin-top:8px;">⚖ Tiebreaker order: <strong style="color:var(--gold);">H2H</strong> head-to-head wins · <strong style="color:var(--gold);">L</strong> fewest losses · <strong style="color:var(--gold);">–</strong> coin flip</div>` : ''}
   </div>`;
 
   // Matchups
@@ -2364,8 +2369,8 @@ function renderCompletedTournament(tourn) {
 }
 
 function getTournamentStandings(tourn) {
-  return tourn.playerIds.map(pid => {
-    const p = state.players.find(pl => pl.id === pid) || { name: pid, emoji: '👤' };
+  const players = tourn.playerIds.map(pid => {
+    const p = state.players.find(pl => pl.id === pid) || { name: pid, emoji: '👤', id: pid };
     let wins = 0, losses = 0;
     (tourn.matchups||[]).forEach(mu => {
       if (mu.winnerId) {
@@ -2374,8 +2379,53 @@ function getTournamentStandings(tourn) {
         }
       }
     });
-    return { ...p, wins, losses, played: wins + losses };
-  }).sort((a,b) => b.wins - a.wins || a.losses - b.losses);
+    return { ...p, wins, losses, played: wins + losses, h2hWins: 0, tiebreakerUsed: null };
+  });
+
+  // First pass: sort by wins descending
+  players.sort((a, b) => b.wins - a.wins);
+
+  // Second pass: resolve tied-wins groups with tiebreaker chain
+  let i = 0;
+  while (i < players.length) {
+    let j = i;
+    while (j < players.length && players[j].wins === players[i].wins) j++;
+    if (j - i > 1) {
+      // This group is tied on wins — compute head-to-head wins within the group
+      const groupIds = new Set(players.slice(i, j).map(p => p.id));
+      players.slice(i, j).forEach(p => {
+        p.h2hWins = (tourn.matchups||[]).filter(mu =>
+          mu.winnerId === p.id && groupIds.has(mu.p1) && groupIds.has(mu.p2)
+        ).length;
+      });
+
+      players.slice(i, j).sort((a, b) => {
+        // 1) Head-to-head wins among tied players
+        if (b.h2hWins !== a.h2hWins) {
+          a.tiebreakerUsed = a.tiebreakerUsed || 'h2h';
+          b.tiebreakerUsed = b.tiebreakerUsed || 'h2h';
+          return b.h2hWins - a.h2hWins;
+        }
+        // 2) Fewest losses overall
+        if (a.losses !== b.losses) {
+          a.tiebreakerUsed = a.tiebreakerUsed || 'losses';
+          b.tiebreakerUsed = b.tiebreakerUsed || 'losses';
+          return a.losses - b.losses;
+        }
+        // 3) Coin flip — deterministic by player ID so it's stable across renders
+        a.tiebreakerUsed = a.tiebreakerUsed || 'random';
+        b.tiebreakerUsed = b.tiebreakerUsed || 'random';
+        return a.id < b.id ? -1 : 1;
+      });
+
+      // Write sorted group back into players array
+      const sorted = players.slice(i, j);
+      for (let k = 0; k < sorted.length; k++) players[i + k] = sorted[k];
+    }
+    i = j;
+  }
+
+  return players;
 }
 
 async function setRRWinner(tournId, matchupIdx, winnerId) {
